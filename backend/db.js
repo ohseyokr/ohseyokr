@@ -1,8 +1,8 @@
 const { Pool } = require('pg');
-const path = require('path'); // ^^ path 모듈 추가
 
-// ^^ server.js와 동일하게 .env 경로를 명시적으로 절대경로 지정
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+// Render Cloud 대시보드의 Environment Variables가 자동으로 적용됩니다.
+// 로컬 환경을 위한 기본 설정만 남기고 강제 경로 설정은 제거합니다.
+require('dotenv').config();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
