@@ -3,8 +3,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// server.js 상단에 추가
-const path = require('path');
 
 // ... 기존 미들웨어 코드 아래에 추가
 // 'public' 폴더에 index.html을 넣고 아래와 같이 설정하거나,
