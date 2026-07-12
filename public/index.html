@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohseyokr | TOPIK 학습 & K-Goods 쇼핑</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Pretendard Premium Font -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'role-guest': '#3465e0',
+                        'role-member': '#2f8f4e',
+                        'role-staff': '#e07a2c',
+                        'role-admin': '#8a3fd1',
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; background-color: #f3f4f6; color: #26292e; }
+        .hide { display: none !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Interactive Utilities */
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .chart-placeholder { background: repeating-linear-gradient(45deg, #f8fafc, #f8fafc 10px, #f1f5f9 10px, #f1f5f9 20px); }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col relative selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-24 right-6 z-50 flex flex-col gap-2"></div>
+
+    <!-- Role Switcher (Utility Top Bar) -->
+    <div id="role-switcher-bar" class="bg-slate-800 text-slate-300 text-[11px] py-1.5 px-6 flex justify-between items-center z-50 relative transition-colors duration-300">
+        <div class="flex space-x-4 items-center">
+            <span class="font-bold text-white flex items-center"><i data-lucide="eye" class="w-3 h-3 mr-1"></i>체험 뷰 전환:</span>
+            <button onclick="app.login('GUEST')" class="hover:text-white transition">GUEST (비회원)</button>
+            <button onclick="app.login('MEMBER')" class="hover:text-white transition">MEMBER (회원)</button>
+            <button onclick="app.login('STAFF')" class="hover:text-white transition">STAFF (직원)</button>
+            <button onclick="app.login('ADMIN')" class="hover:text-white transition">ADMIN (관리자)</button>
+        </div>
+        <div id="auth-status" class="flex items-center space-x-2 font-bold text-white">
+            <span id="badge-role" class="px-2 py-0.5 rounded text-[10px] bg-slate-600">GUEST</span>
+        </div>
+    </div>
+
+    <!-- Main Global Navigation -->
+    <header class="glass-panel border-b sticky top-0 z-40 shadow-sm transition-all duration-300" id="main-header">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-10">
+                <h1 class="text-2xl font-black tracking-tighter cursor-pointer flex items-center" onclick="app.navigate('home')">
+                    OHSEYOKR<span id="brand-dot" class="text-role-guest text-3xl leading-none">.</span>
+                </h1>
+                
+                <!-- GNB Links -->
+                <nav class="hidden md:flex space-x-6 font-semibold text-sm text-slate-600" id="gnb-nav">
+                    <button onclick="app.navigate('home')" class="nav-btn hover:text-slate-900 transition">홈</button>
+                    <button onclick="app.navigate('videos')" class="nav-btn hover:text-slate-900 transition">TOPIK 영상</button>
+                    <button onclick="app.navigate('shop')" class="nav-btn hover:text-slate-900 transition">K-Goods</button>
+                    <button onclick="app.navigate('notice')" class="nav-btn hover:text-slate-900 transition text-slate-400">공지사항</button>
+                </nav>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <div class="relative text-slate-400 focus-within:text-slate-600 hidden md:block">
+                    <i data-lucide="search" class="absolute left-2.5 top-1.5 w-4 h-4"></i>
+                    <input type="text" placeholder="검색어 입력" class="bg-slate-100 border-none rounded-full pl-9 pr-4 py-1.5 text-xs focus:ring-2 focus:ring-slate-200 outline-none w-48 transition-all">
+                </div>
+                
+                <button onclick="app.toggleCart()" class="relative p-2 text-slate-600 hover:text-slate-900 transition rounded-full hover:bg-slate-100">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-badge" class="absolute top-0 right-0 bg-rose-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </button>
+
+                <!-- Dynamic Right Actions -->
+                <div id="header-actions-guest" class="flex space-x-2">
+                    <button onclick="app.login('MEMBER')" class="bg-role-guest text-white text-xs px-4 py-1.5 rounded-full font-bold hover:bg-blue-700 transition">로그인</button>
+                </div>
+                <div id="header-actions-member" class="hide flex items-center space-x-3">
+                    <button class="text-slate-500 hover:text-slate-900"><i data-lucide="bell" class="w-5 h-5"></i></button>
+                    <button onclick="app.navigate('mypage')" class="w-8 h-8 rounded-full bg-role-member text-white flex items-center justify-center font-bold text-xs hover:ring-2 ring-offset-2 ring-role-member transition">
+                        MY
+                    </button>
+                </div>
+                <div id="header-actions-office" class="hide flex items-center space-x-3">
+                    <button onclick="app.navigate('office')" id="btn-office" class="bg-slate-900 text-white text-xs px-4 py-1.5 rounded-full font-bold hover:bg-slate-800 transition flex items-center">
+                        <i data-lucide="shield" class="w-3.5 h-3.5 mr-1.5"></i> OFFICE 입장
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow w-full pb-20">
+        
+        <!-- ==================== 1. GUEST HOME VIEW ==================== -->
+        <div id="view-guest-home" class="view-section hide max-w-7xl mx-auto px-6 py-8 space-y-12">
+            <!-- Hero -->
+            <div class="bg-blue-50 border border-blue-100 rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="md:w-1/2 space-y-4">
+                    <span class="inline-flex py-1 px-3 rounded-full bg-blue-100 text-blue-800 text-xs font-bold">오세요코리아</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight">토픽 합격의 시작,<br><span class="text-role-guest">Ohseyokr</span>와 함께하세요</h2>
+                    <p class="text-slate-600 text-sm">무료 강의로 실력을 키우고, K-굿즈로 한국을 더 가까이 경험해보세요.</p>
+                    <div class="flex space-x-3 pt-2">
+                        <button onclick="app.login('MEMBER')" class="bg-role-guest text-white px-6 py-2.5 rounded-lg font-bold hover:bg-blue-700 transition text-sm">무료로 시작하기</button>
+                        <button onclick="app.navigate('videos')" class="bg-white text-slate-600 border px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50 transition text-sm">샘플 강의 보기</button>
+                    </div>
+                </div>
+                <div class="md:w-5/12 w-full grid grid-cols-2 gap-4">
+                    <img src="https://placehold.co/400x300/3465e0/FFF?text=TOPIK+Study" class="rounded-xl shadow-md transform -rotate-2" alt="Promo">
+                    <img src="https://placehold.co/400x300/eef0f3/7a828c?text=K-Goods" class="rounded-xl shadow-md transform translate-y-4" alt="Promo">
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-slate-900 border-l-4 border-role-guest pl-3">인기 토픽 영상</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="guest-video-list"></div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-xl font-bold text-slate-900 border-l-4 border-role-guest pl-3">추천 K-Goods</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="guest-product-list"></div>
+            </div>
+        </div>
+
+        <!-- ==================== 2. MEMBER HOME VIEW ==================== -->
+        <div id="view-member-home" class="view-section hide max-w-7xl mx-auto px-6 py-8 space-y-8">
+            <!-- Personalized Hero -->
+            <div class="bg-green-50 border border-green-100 rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-slate-900">안녕하세요, <span class="text-role-member">오세요</span> 님! 👋</h2>
+                    <p class="text-slate-600 text-sm mt-2">오늘도 꾸준한 학습으로 목표에 다가가요.</p>
+                </div>
+                <button onclick="app.navigate('videos')" class="bg-role-member text-white px-5 py-2 rounded-lg font-bold hover:bg-green-700 transition text-sm flex items-center">
+                    <i data-lucide="play-circle" class="w-4 h-4 mr-2"></i> 학습 이어서 하기
+                </button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-sm hover:shadow transition">
+                    <div class="text-xs font-bold text-slate-500 mb-1">총 학습 시간</div>
+                    <div class="text-2xl font-black text-slate-900">12h 30m</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-sm hover:shadow transition">
+                    <div class="text-xs font-bold text-slate-500 mb-1">완료 강의</div>
+                    <div class="text-2xl font-black text-role-member">24개</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-sm hover:shadow transition">
+                    <div class="text-xs font-bold text-slate-500 mb-1">연속 학습일</div>
+                    <div class="text-2xl font-black text-orange-500">7일</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 text-center shadow-sm hover:shadow transition">
+                    <div class="text-xs font-bold text-slate-500 mb-1">현재 단계</div>
+                    <div class="text-2xl font-black text-slate-900">중급</div>
+                </div>
+            </div>
+
+            <!-- Continue & Recommended -->
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <h3 class="text-lg font-bold text-slate-900 border-l-4 border-role-member pl-3">맞춤 추천 강의</h3>
+                        <a href="#" class="text-xs font-bold text-role-member">전체보기</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4" id="member-video-list"></div>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-end">
+                        <h3 class="text-lg font-bold text-slate-900 border-l-4 border-role-member pl-3">내 관심 굿즈</h3>
+                        <a href="#" class="text-xs font-bold text-role-member">쇼핑가기</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4" id="member-product-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MY PAGE (MEMBER ONLY) ==================== -->
+        <div id="view-mypage" class="view-section hide max-w-7xl mx-auto px-6 py-8">
+            <h2 class="text-2xl font-black mb-6">마이페이지</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Learning Status -->
+                <div class="bg-white border rounded-xl p-6 space-y-4">
+                    <div class="font-bold border-b pb-2">학습 현황</div>
+                    <div class="flex space-x-2 text-xs font-bold">
+                        <span class="bg-role-member text-white px-3 py-1 rounded-full">학습진도</span>
+                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full border">최근본영상</span>
+                    </div>
+                    <div class="h-32 chart-placeholder rounded-lg flex items-center justify-center text-slate-400 text-xs font-bold">
+                        단계별 진도율 그래프 UI
+                    </div>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between border-b pb-2"><span class="font-medium">TOPIK II 듣기 기본</span><span class="text-role-member font-bold text-xs bg-green-50 px-2 py-0.5 rounded">완료</span></div>
+                        <div class="flex justify-between border-b pb-2"><span class="font-medium">중급 관용표현 마스터</span><span class="text-blue-600 font-bold text-xs bg-blue-50 px-2 py-0.5 rounded">진행중 (45%)</span></div>
+                    </div>
+                </div>
+
+                <!-- Order Status -->
+                <div class="bg-white border rounded-xl p-6 space-y-4">
+                    <div class="font-bold border-b pb-2">최근 주문 내역</div>
+                    <div class="flex space-x-2 text-xs font-bold">
+                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full border">주문조회</span>
+                        <span class="bg-slate-100 text-slate-500 px-3 py-1 rounded-full border">포인트 내역</span>
+                    </div>
+                    <div class="space-y-3 text-sm mt-4">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-lg border">
+                            <div>
+                                <div class="text-[10px] text-slate-500 font-mono mb-1">2026-07-10 | ORD-10293</div>
+                                <div class="font-bold">K-뷰티 스킨케어 입문 세트 외 1건</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-slate-900">₩54,000</div>
+                                <div class="text-[10px] text-emerald-600 font-bold">배송중</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== OFFICE (STAFF / ADMIN) ==================== -->
+        <div id="view-office" class="view-section hide w-full h-[calc(100vh-70px)] bg-slate-50 flex overflow-hidden">
+            <!-- Office Sidebar -->
+            <div class="w-56 bg-white border-r flex flex-col">
+                <div class="p-4 border-b">
+                    <span class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center" id="office-role-label">OFFICE</span>
+                </div>
+                <nav class="flex-1 overflow-y-auto p-3 text-sm font-semibold text-slate-600 space-y-1" id="office-sidebar-nav">
+                    <!-- Nav items injected by JS based on role -->
+                </nav>
+            </div>
+
+            <!-- Office Main Content -->
+            <div class="flex-1 overflow-y-auto p-8">
+                
+                <!-- STAFF View: Content Management Focus -->
+                <div id="office-staff-panel" class="hide space-y-6 max-w-5xl">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-black text-slate-900 flex items-center">
+                            <i data-lucide="video" class="w-6 h-6 mr-2 text-role-staff"></i> 영상 콘텐츠 관리
+                        </h2>
+                        <button class="bg-role-staff text-white px-4 py-1.5 rounded text-xs font-bold shadow-sm">신규 등록</button>
+                    </div>
+                    
+                    <div class="flex space-x-2 text-xs font-bold mb-4">
+                        <span class="bg-role-staff text-white px-3 py-1.5 rounded-full shadow-sm">전체목록</span>
+                        <span class="bg-white text-slate-500 border px-3 py-1.5 rounded-full">승인대기</span>
+                        <span class="bg-white text-slate-500 border px-3 py-1.5 rounded-full">태그완료</span>
+                    </div>
+
+                    <div class="bg-white border rounded-xl shadow-sm overflow-hidden">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-500 border-b text-xs">
+                                <tr><th class="p-4">영상 제목</th><th class="p-4">난이도</th><th class="p-4">상태</th><th class="p-4">관리</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-4 font-bold text-slate-800">토픽 쓰기 기출 풀이</td>
+                                    <td class="p-4 text-xs">중급</td>
+                                    <td class="p-4"><span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold">대기중</span></td>
+                                    <td class="p-4"><button class="text-role-staff text-xs font-bold border border-role-staff px-2 py-1 rounded hover:bg-orange-50">태그수정</button></td>
+                                </tr>
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-4 font-bold text-slate-800">초급 문법 총정리 1편</td>
+                                    <td class="p-4 text-xs">초급</td>
+                                    <td class="p-4"><span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-1 rounded font-bold">태그완료</span></td>
+                                    <td class="p-4"><button class="text-role-staff text-xs font-bold border border-role-staff px-2 py-1 rounded hover:bg-orange-50">태그수정</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-6 mt-6">
+                        <div class="bg-white border rounded-xl p-5">
+                            <h3 class="font-bold text-sm mb-4 border-b pb-2">선택 영상 태깅 / 수정</h3>
+                            <div class="space-y-3 text-xs">
+                                <div class="flex justify-between"><span class="text-slate-500">영상 제목</span><span class="font-bold">토픽 쓰기 기출 풀이</span></div>
+                                <div class="flex justify-between"><span class="text-slate-500">카테고리</span><span class="font-bold border rounded px-2 py-0.5">쓰기 ▾</span></div>
+                                <div class="flex justify-between items-start">
+                                    <span class="text-slate-500">관련 태그</span>
+                                    <div class="flex gap-1 flex-wrap justify-end">
+                                        <span class="bg-slate-100 px-2 py-0.5 rounded text-[10px]">#기출표현</span>
+                                        <span class="bg-slate-100 px-2 py-0.5 rounded text-[10px]">#TOPIK2</span>
+                                    </div>
+                                </div>
+                                <button class="w-full bg-role-staff text-white py-2 rounded-lg font-bold mt-2">저장 및 승인요청</button>
+                            </div>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5">
+                            <h3 class="font-bold text-sm mb-4 border-b pb-2">최근 1:1 문의 (CS)</h3>
+                            <div class="space-y-2 text-xs">
+                                <div class="font-bold">배송이 언제 되나요? <span class="text-[10px] text-slate-400 font-normal ml-2">oseyo@...</span></div>
+                                <div class="bg-slate-50 p-2 rounded text-slate-600">안녕하세요, 배송 일정이 궁금합니다. 제주도입니다.</div>
+                                <textarea class="w-full border rounded p-2 mt-2 h-16 outline-none focus:ring-1 focus:ring-role-staff placeholder:text-slate-300" placeholder="답변을 작성하세요..."></textarea>
+                                <button class="w-full bg-slate-800 text-white py-2 rounded-lg font-bold">답변 등록</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN View: Analytics & Global Approval Focus -->
+                <div id="office-admin-panel" class="hide space-y-6 max-w-6xl">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900 flex items-center">
+                                <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-role-admin"></i> 종합 대시보드
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">2026-07-01 ~ 2026-07-13 누적 통계</p>
+                        </div>
+                        <button onclick="app.batchApprove()" class="bg-role-admin text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md hover:bg-purple-700 transition flex items-center">
+                            <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> 전체 승인 처리
+                        </button>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl border shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-1">총 매출</div>
+                            <div class="text-2xl font-black text-slate-900">₩12,345,000</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-1">총 주문</div>
+                            <div class="text-2xl font-black text-slate-900">412건</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-1">신규 회원</div>
+                            <div class="text-2xl font-black text-role-admin">256명</div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-1">환불 통계</div>
+                            <div class="text-2xl font-black text-rose-500">₩242,000</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Charts Dummy -->
+                        <div class="bg-white border rounded-xl p-5 h-48 flex flex-col">
+                            <h3 class="font-bold text-sm mb-3">주간 매출 추이</h3>
+                            <div class="flex-1 chart-placeholder rounded-lg flex items-center justify-center text-slate-400 text-xs font-bold">
+                                선 그래프 영역
+                            </div>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5 h-48 flex flex-col">
+                            <h3 class="font-bold text-sm mb-3">주문 상태 현황</h3>
+                            <div class="flex-1 chart-placeholder rounded-lg flex items-center justify-center text-slate-400 text-xs font-bold">
+                                도넛 차트 영역
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white border rounded-xl p-5">
+                            <h3 class="font-bold text-sm border-b pb-2 mb-3">승인 대기 현황 (실시간)</h3>
+                            <table class="w-full text-left text-xs">
+                                <tbody>
+                                    <tr class="border-b"><td class="py-2">상품 등록 요청 (MD)</td><td class="py-2 text-right font-bold text-role-admin">8건</td></tr>
+                                    <tr class="border-b"><td class="py-2">콘텐츠 공개 승인 (STAFF)</td><td class="py-2 text-right font-bold text-role-admin">15건</td></tr>
+                                    <tr class="border-b"><td class="py-2">상품·콘텐츠 매칭</td><td class="py-2 text-right font-bold text-role-admin">6건</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5">
+                            <h3 class="font-bold text-sm border-b pb-2 mb-3">권한 / 직원 관리</h3>
+                            <table class="w-full text-left text-[11px]">
+                                <thead class="text-slate-400"><tr><th class="pb-2">이름</th><th class="pb-2">이메일</th><th class="pb-2">역할</th></tr></thead>
+                                <tbody>
+                                    <tr class="border-b"><td class="py-2 font-bold">STAFF_콘텐츠</td><td class="py-2 text-slate-500">staff1@ohseyokr...</td><td><span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-bold">STAFF</span></td></tr>
+                                    <tr class="border-b"><td class="py-2 font-bold">STAFF_상품</td><td class="py-2 text-slate-500">staff2@ohseyokr...</td><td><span class="bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-bold">STAFF</span></td></tr>
+                                    <tr class="border-b"><td class="py-2 font-bold">SUPER_ADMIN</td><td class="py-2 text-slate-500">admin@ohseyokr...</td><td><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded font-bold">ADMIN</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ==================== COMMON VIEWS (VIDEOS & SHOP) ==================== -->
+        <div id="view-videos" class="view-section hide max-w-7xl mx-auto px-6 py-8 space-y-6">
+            <h2 class="text-2xl font-black">TOPIK 한국어 동영상 강좌</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="full-video-list"></div>
+        </div>
+
+        <div id="view-shop" class="view-section hide max-w-7xl mx-auto px-6 py-8 space-y-6">
+            <h2 class="text-2xl font-black">Ohseyokr K-Goods 샵</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="full-product-list"></div>
+        </div>
+
+    </main>
+
+    <!-- Shopping Cart Drawer -->
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out border-l flex flex-col hide">
+        <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+            <h3 class="text-lg font-black text-slate-900 flex items-center">
+                <i data-lucide="shopping-bag" class="w-5 h-5 text-slate-900 mr-2"></i> 장바구니
+            </h3>
+            <button onclick="app.toggleCart()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+        </div>
+        <div class="flex-grow overflow-y-auto p-6 space-y-4" id="cart-items-container"></div>
+        <div class="p-6 border-t bg-slate-50 space-y-4">
+            <div class="flex justify-between items-center text-sm font-bold text-slate-700">
+                <span>합계 금액:</span>
+                <span id="cart-total" class="text-xl text-slate-900 font-extrabold">₩0</span>
+            </div>
+            <button onclick="app.checkout()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-md transition text-sm">
+                주문 결제하기
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t py-8 mt-auto" id="main-footer">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-8 text-xs text-slate-500">
+            <div class="space-y-2">
+                <div class="font-extrabold text-slate-800 text-sm mb-4">Ohseyokr (오세요코리아)</div>
+                <p>사업자등록번호: 123-45-67890 | 통신판매업신고: 제2026-서울-0000호</p>
+                <p>주소: 경기도 고양시 일산동구 | 이메일: support@ohseyokr.com</p>
+                <div class="flex space-x-4 pt-2">
+                    <a href="#" class="hover:text-slate-800">이용약관</a>
+                    <a href="#" class="hover:text-slate-800 font-semibold text-slate-700">개인정보처리방침</a>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border">
+                <div>
+                    <div class="font-bold text-slate-800 mb-2">공통 사항</div>
+                    <ul class="space-y-1">
+                        <li>반응형 웹 (Mobile/PC)</li>
+                        <li>구글 소셜 로그인 지원</li>
+                        <li>통신 암호화 및 역할별 제어</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="font-bold text-slate-800 mb-2">역할별 접근 범위</div>
+                    <ul class="space-y-1">
+                        <li><span class="text-role-guest font-bold">비회원</span> : 공개 콘텐츠 열람</li>
+                        <li><span class="text-role-member font-bold">회원</span> : 개인화 학습 및 구매</li>
+                        <li><span class="text-role-staff font-bold">직원</span> : 담당 실무 관리</li>
+                        <li><span class="text-role-admin font-bold">ADMIN</span> : 전체 승인 및 통계</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Lucide Icons Safely Render
+        function ensureIcons() {
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+        }
+
+        // Mock Data for Frontend-only demonstration
+        const mockVideos = [
+            { id: 'v1', title: 'TOPIK II 듣기 실전 모의고사 1회', topik_level: '고급', duration_seconds: 2720, thumbnail_url: 'https://placehold.co/400x225/e2e8f0/475569?text=TOPIK+Listening' },
+            { id: 'v2', title: '기초 한국어 문법 100선 단기 속성', topik_level: '초급', duration_seconds: 4815, thumbnail_url: 'https://placehold.co/400x225/e2e8f0/475569?text=Grammar' },
+            { id: 'v3', title: 'TOPIK 쓰기 54번 만점 작성 전략법', topik_level: '고급', duration_seconds: 3120, thumbnail_url: 'https://placehold.co/400x225/e2e8f0/475569?text=TOPIK+Writing' },
+            { id: 'v4', title: '중급 어휘 300제 빈칸 채우기', topik_level: '중급', duration_seconds: 1500, thumbnail_url: 'https://placehold.co/400x225/e2e8f0/475569?text=Vocabulary' }
+        ];
+
+        const mockProducts = [
+            { id: 'p1', name: 'K-뷰티 스킨케어 입문 세트', base_price: 34000, thumbnail_url: 'https://placehold.co/300x300/f8fafc/94a3b8?text=K-Beauty' },
+            { id: 'p2', name: 'TOPIK II 필수 단어 기출 한권 완성', base_price: 17000, thumbnail_url: 'https://placehold.co/300x300/f8fafc/94a3b8?text=Book' },
+            { id: 'p3', name: '한국 정통 홍삼 스킨 토닉 세트', base_price: 68000, thumbnail_url: 'https://placehold.co/300x300/f8fafc/94a3b8?text=Ginseng' },
+            { id: 'p4', name: '오세요 한글 캘리그라피 펜 세트', base_price: 12000, thumbnail_url: 'https://placehold.co/300x300/f8fafc/94a3b8?text=Stationery' }
+        ];
+
+        const app = {
+            state: {
+                role: 'GUEST', // GUEST, MEMBER, STAFF, ADMIN
+                cart: [],
+                products: []
+            },
+
+            init() {
+                this.updateUI();
+                this.loadData();
+                ensureIcons();
+            },
+
+            showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const bg = type === 'success' ? 'bg-slate-900 text-white' : 'bg-rose-500 text-white';
+                toast.className = `flex items-center space-x-3 px-5 py-3 rounded-lg shadow-xl text-xs font-bold transition transform translate-y-2 opacity-0 duration-300 ${bg}`;
+                toast.innerHTML = `<span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+                setTimeout(() => {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+
+            async loadData() {
+                // Try fetching from real API, fallback to Mock Data if backend is offline
+                try {
+                    const vRes = await fetch('/api/contents/videos');
+                    const videos = vRes.ok ? await vRes.json() : mockVideos;
+                    this.renderVideos(videos);
+
+                    const pRes = await fetch('/api/shop/products');
+                    this.state.products = pRes.ok ? await pRes.json() : mockProducts;
+                    this.renderProducts(this.state.products);
+                } catch (e) {
+                    console.warn("Backend not detected. Using local mock data.", e);
+                    this.renderVideos(mockVideos);
+                    this.state.products = mockProducts;
+                    this.renderProducts(mockProducts);
+                }
+            },
+
+            renderVideos(videos) {
+                const html = videos.map(v => `
+                    <div class="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition group cursor-pointer">
+                        <div class="relative aspect-video overflow-hidden">
+                            <img src="${v.thumbnail_url}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">${Math.floor(v.duration_seconds/60)}:${v.duration_seconds%60||'00'}</div>
+                        </div>
+                        <div class="p-3 space-y-1">
+                            <span class="text-[9px] font-bold text-slate-500 border px-1.5 py-0.5 rounded">${v.topik_level}</span>
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-tight">${v.title}</h4>
+                        </div>
+                    </div>
+                `).join('');
+                
+                if(document.getElementById('guest-video-list')) document.getElementById('guest-video-list').innerHTML = html;
+                if(document.getElementById('member-video-list')) document.getElementById('member-video-list').innerHTML = html;
+                if(document.getElementById('full-video-list')) document.getElementById('full-video-list').innerHTML = html;
+            },
+
+            renderProducts(products) {
+                const html = products.map(p => `
+                    <div class="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition group flex flex-col h-full">
+                        <div class="relative aspect-square overflow-hidden bg-slate-50 p-4">
+                            <img src="${p.thumbnail_url}" class="w-full h-full object-contain group-hover:scale-105 transition duration-500 mix-blend-multiply">
+                        </div>
+                        <div class="p-3 flex flex-col justify-between flex-grow">
+                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm line-clamp-2 leading-tight mb-2">${p.name}</h4>
+                            <div class="flex justify-between items-center mt-auto">
+                                <span class="font-black text-slate-900 text-sm">₩${p.base_price.toLocaleString()}</span>
+                                <button onclick="app.addToCart('${p.id}')" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-900 hover:text-white flex items-center justify-center transition">
+                                    <i data-lucide="shopping-cart" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                
+                if(document.getElementById('guest-product-list')) document.getElementById('guest-product-list').innerHTML = html;
+                if(document.getElementById('member-product-list')) document.getElementById('member-product-list').innerHTML = html;
+                if(document.getElementById('full-product-list')) document.getElementById('full-product-list').innerHTML = html;
+                ensureIcons();
+            },
+
+            navigate(view) {
+                // Hide all views
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+                
+                // Active Nav Styles
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('text-slate-900', 'font-black');
+                    btn.classList.add('text-slate-600');
+                    
+                    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${view}'`)) {
+                        btn.classList.remove('text-slate-600');
+                        btn.classList.add('text-slate-900', 'font-black');
+                    }
+                });
+
+                // Show target view logic based on role
+                if (view === 'home') {
+                    document.getElementById('main-footer').classList.remove('hide');
+                    if (this.state.role === 'GUEST') document.getElementById('view-guest-home').classList.remove('hide');
+                    else document.getElementById('view-member-home').classList.remove('hide');
+                } else if (view === 'office') {
+                    document.getElementById('main-footer').classList.add('hide'); // Hide footer in office
+                    document.getElementById('view-office').classList.remove('hide');
+                    if (this.state.role === 'ADMIN') {
+                        document.getElementById('office-admin-panel').classList.remove('hide');
+                        document.getElementById('office-staff-panel').classList.add('hide');
+                    } else {
+                        document.getElementById('office-admin-panel').classList.add('hide');
+                        document.getElementById('office-staff-panel').classList.remove('hide');
+                    }
+                } else {
+                    document.getElementById('main-footer').classList.remove('hide');
+                    const target = document.getElementById(`view-${view}`);
+                    if(target) target.classList.remove('hide');
+                }
+            },
+
+            login(role) {
+                this.state.role = role;
+                this.updateUI();
+                this.showToast(`✅ ${role} 권한으로 뷰가 전환되었습니다.`);
+                
+                if(role === 'STAFF' || role === 'ADMIN') {
+                    this.navigate('office');
+                } else {
+                    this.navigate('home');
+                }
+            },
+
+            updateUI() {
+                const { role } = this.state;
+                
+                // Topbar Badge and Brand Dot Color
+                const badge = document.getElementById('badge-role');
+                const brandDot = document.getElementById('brand-dot');
+                badge.innerText = role;
+                
+                // Reset colors
+                badge.className = `px-2 py-0.5 rounded text-[10px] bg-slate-600`;
+                brandDot.className = `text-3xl leading-none`;
+                
+                // Header action visibility
+                document.getElementById('header-actions-guest').classList.add('hide');
+                document.getElementById('header-actions-member').classList.add('hide');
+                document.getElementById('header-actions-office').classList.add('hide');
+
+                // Apply Role Themes
+                if (role === 'GUEST') {
+                    badge.classList.add('bg-role-guest');
+                    brandDot.classList.add('text-role-guest');
+                    document.getElementById('header-actions-guest').classList.remove('hide');
+                } else if (role === 'MEMBER') {
+                    badge.classList.add('bg-role-member');
+                    brandDot.classList.add('text-role-member');
+                    document.getElementById('header-actions-member').classList.remove('hide');
+                } else if (role === 'STAFF') {
+                    badge.classList.add('bg-role-staff');
+                    brandDot.classList.add('text-role-staff');
+                    document.getElementById('header-actions-office').classList.remove('hide');
+                    this.renderOfficeSidebar('STAFF');
+                } else if (role === 'ADMIN') {
+                    badge.classList.add('bg-role-admin');
+                    brandDot.classList.add('text-role-admin');
+                    document.getElementById('header-actions-office').classList.remove('hide');
+                    this.renderOfficeSidebar('ADMIN');
+                }
+            },
+
+            renderOfficeSidebar(role) {
+                const nav = document.getElementById('office-sidebar-nav');
+                const label = document.getElementById('office-role-label');
+                
+                if(role === 'STAFF') {
+                    label.innerText = 'OFFICE (STAFF)';
+                    label.className = 'bg-role-staff text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center';
+                    nav.innerHTML = `
+                        <div class="px-3 py-2 text-slate-400">대시보드</div>
+                        <div class="px-3 py-2 bg-orange-50 text-role-staff rounded font-bold">콘텐츠 관리</div>
+                        <div class="px-3 py-1.5 pl-6 text-xs text-slate-500">영상 태깅 관리</div>
+                        <div class="px-3 py-1.5 pl-6 text-xs text-slate-500">상품 매칭</div>
+                        <div class="px-3 py-2 text-slate-400">CS 관리 (1:1문의)</div>
+                    `;
+                } else {
+                    label.innerText = 'OFFICE (ADMIN)';
+                    label.className = 'bg-role-admin text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center';
+                    nav.innerHTML = `
+                        <div class="px-3 py-2 bg-purple-50 text-role-admin rounded font-bold">종합 대시보드</div>
+                        <div class="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded">승인 관리 (전체)</div>
+                        <div class="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded">정산/통계</div>
+                        <div class="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded">회원 및 권한 관리</div>
+                        <div class="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded">시스템 설정</div>
+                    `;
+                }
+            },
+
+            addToCart(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (!product) return;
+
+                const existing = this.state.cart.find(item => item.id === productId);
+                if (existing) existing.quantity += 1;
+                else this.state.cart.push({ ...product, quantity: 1 });
+                
+                this.updateCartUI();
+                this.showToast('장바구니에 상품을 담았습니다.');
+            },
+
+            toggleCart() {
+                const drawer = document.getElementById('cart-drawer');
+                if (drawer.classList.contains('hide')) {
+                    drawer.classList.remove('hide');
+                    setTimeout(() => drawer.classList.remove('translate-x-full'), 10);
+                } else {
+                    drawer.classList.add('translate-x-full');
+                    setTimeout(() => drawer.classList.add('hide'), 300);
+                }
+            },
+
+            updateCartUI() {
+                document.getElementById('cart-badge').innerText = this.state.cart.reduce((s, i) => s + i.quantity, 0);
+                const container = document.getElementById('cart-items-container');
+                
+                if (this.state.cart.length === 0) {
+                    container.innerHTML = `<div class="text-center text-slate-400 py-10 text-sm">장바구니가 비어 있습니다.</div>`;
+                    document.getElementById('cart-total').innerText = "₩0";
+                    return;
+                }
+
+                container.innerHTML = this.state.cart.map((item, idx) => `
+                    <div class="flex items-center gap-3 border-b pb-3">
+                        <div class="w-12 h-12 bg-slate-100 rounded flex-shrink-0 p-1"><img src="${item.thumbnail_url}" class="w-full h-full object-contain mix-blend-multiply"></div>
+                        <div class="flex-grow min-w-0">
+                            <div class="font-bold text-xs text-slate-800 truncate">${item.name}</div>
+                            <div class="text-slate-500 text-[10px] mt-0.5">₩${item.base_price.toLocaleString()}</div>
+                        </div>
+                        <div class="flex items-center text-xs font-bold text-slate-700 space-x-2 bg-slate-100 rounded px-1 py-0.5">
+                            <button onclick="app.updateQty(${idx}, -1)" class="w-4 text-center">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="app.updateQty(${idx}, 1)" class="w-4 text-center">+</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                const total = this.state.cart.reduce((sum, item) => sum + (item.base_price * item.quantity), 0);
+                document.getElementById('cart-total').innerText = `₩${total.toLocaleString()}`;
+            },
+
+            updateQty(idx, change) {
+                this.state.cart[idx].quantity += change;
+                if (this.state.cart[idx].quantity <= 0) this.state.cart.splice(idx, 1);
+                this.updateCartUI();
+            },
+
+            checkout() {
+                if (this.state.cart.length === 0) return this.showToast('장바구니가 비어 있습니다.', 'error');
+                if (this.state.role === 'GUEST') return this.showToast('결제는 MEMBER 이상 권한으로 로그인 후 가능합니다.', 'error');
+                
+                this.state.cart = [];
+                this.updateCartUI();
+                this.toggleCart();
+                this.showToast('🎉 결제가 성공적으로 완료되었습니다! (Mock 처리)');
+            },
+
+            batchApprove() {
+                this.showToast('✨ 대기 중인 모든 항목이 일괄 승인되었습니다! (Mock 처리)');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+            app.navigate('home'); // Initial View
+        });
+    </script>
+</body>
+</html>
