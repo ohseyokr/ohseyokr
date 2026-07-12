@@ -16,6 +16,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+
 // 로컬 환경을 위한 .env 설정 (Render에서는 Dashboard의 Env Vars가 우선 적용됨)
 dotenv.config({ path: path.join(__dirname, '.env') });
 
