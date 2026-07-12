@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohseyokr | TOPIK 학습 & K-Goods</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom Styles - 단일 파일 원칙에 따라 내장 */
+        :root {
+            --primary: #4F46E5; /* Indigo 600 */
+            --secondary: #10B981; /* Emerald 500 */
+        }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f9fafb; }
+        .hide { display: none !important; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 0.5rem; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased h-screen flex flex-col">
+
+    <!-- Global Header -->
+    <header class="bg-white border-b sticky top-0 z-50">
+        <!-- Top Utility Bar -->
+        <div class="bg-gray-100 text-xs text-gray-500 py-1 px-4 flex justify-between items-center">
+            <div class="flex space-x-4">
+                <button class="hover:text-gray-800">한국어 (KO)</button>
+                <span>|</span>
+                <button class="hover:text-gray-800">USD ($)</button>
+            </div>
+            <div class="flex space-x-4 items-center">
+                <a href="#" class="hover:text-gray-800">고객센터</a>
+                
+                <!-- GUEST View -->
+                <div id="nav-guest" class="flex space-x-2">
+                    <button onclick="app.login('MEMBER')" class="text-blue-600 font-semibold hover:underline">회원가입/로그인</button>
+                    <button onclick="app.login('ADMIN')" class="text-xs text-gray-400 hover:text-gray-600">(Admin 체험)</button>
+                </div>
+                
+                <!-- MEMBER View -->
+                <div id="nav-member" class="hide flex space-x-3 items-center">
+                    <span class="font-medium text-gray-800"><span id="user-name">Ohseyo</span>님 환영합니다!</span>
+                    <button class="relative">
+                        <i data-lucide="bell" class="w-4 h-4"></i>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full h-3 w-3 flex items-center justify-center">2</span>
+                    </button>
+                    <button onclick="app.logout()" class="hover:text-gray-800 underline">로그아웃</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main GNB -->
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-8">
+                <h1 class="text-2xl font-bold tracking-tighter text-gray-900 cursor-pointer" onclick="app.navigate('home')">
+                    OHSEYOKR<span class="text-primary text-xl">.</span>
+                </h1>
+                <nav class="hidden md:flex space-x-6 font-medium text-gray-600">
+                    <a href="#" class="hover:text-primary transition">TOPIK 학습</a>
+                    <a href="#" class="hover:text-primary transition">K-Goods</a>
+                    <a href="#" class="hover:text-primary transition">공지사항</a>
+                    <!-- Member Only -->
+                    <a href="#" id="menu-mypage" class="hide text-secondary hover:text-emerald-600 transition">마이페이지</a>
+                </nav>
+            </div>
+            
+            <div class="flex items-center space-x-5">
+                <div class="relative hidden sm:block">
+                    <input type="text" placeholder="검색어를 입력하세요" class="bg-gray-100 border-none rounded-full py-2 pl-4 pr-10 text-sm focus:ring-2 focus:ring-primary outline-none w-48">
+                    <i data-lucide="search" class="absolute right-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                </div>
+                <button class="relative hover:text-primary transition">
+                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                    <span class="absolute -top-1.5 -right-1.5 bg-black text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </button>
+                <button id="btn-office" onclick="app.navigate('office')" class="hide bg-gray-900 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-gray-800 shadow-sm transition">
+                    Office (관리자)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow overflow-y-auto">
+        
+        <!-- ==================== HOME VIEW ==================== -->
+        <div id="view-home" class="container mx-auto px-4 py-8">
+            <!-- Hero Section -->
+            <div class="bg-indigo-50 rounded-2xl p-8 md:p-12 mb-10 flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-6 md:mb-0">
+                    <span id="hero-greeting" class="inline-block py-1 px-3 rounded-full bg-indigo-100 text-indigo-800 text-sm font-bold mb-4">환영합니다</span>
+                    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">TOPIK 합격의 시작,<br>Ohseyokr와 함께하세요</h2>
+                    <p class="text-gray-600 mb-6">무료 한국어 학습 콘텐츠를 시청하고, 관련 K-Goods를 만나보세요.</p>
+                    <button class="bg-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-indigo-700 shadow-md transition">무료로 학습 시작하기</button>
+                </div>
+                <div class="md:w-5/12">
+                    <div class="video-container shadow-xl">
+                        <img src="https://placehold.co/600x337/4F46E5/FFF?text=TOPIK+Promo+Video" alt="Promo">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Member Learning Progress (Only visible if logged in) -->
+            <div id="section-learning" class="hide mb-12">
+                <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center"><i data-lucide="book-open" class="mr-2 w-5 h-5 text-secondary"></i> 이어서 학습하기</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded">INTERMEDIATE</span>
+                                <span class="text-xs text-secondary font-bold">42% 달성</span>
+                            </div>
+                            <h4 class="font-bold text-gray-800 mb-1">중급 문법 총정리 (1/5)</h4>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 mt-4">
+                            <div class="bg-secondary h-2 rounded-full" style="width: 42%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOPIK Videos -->
+            <div class="mb-12">
+                <div class="flex justify-between items-end mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">인기 TOPIK 영상</h3>
+                    <a href="#" class="text-sm text-gray-500 hover:text-primary font-medium">더보기 &rarr;</a>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="video-list">
+                    <!-- JS rendering -->
+                </div>
+            </div>
+
+            <!-- Recommended K-Goods -->
+            <div class="mb-12">
+                <div class="flex justify-between items-end mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">추천 K-Goods</h3>
+                    <div class="flex space-x-2 text-sm font-medium">
+                        <button class="px-3 py-1 bg-gray-900 text-white rounded-full">전체</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">K-뷰티</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200">도서/문구</button>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="product-list">
+                    <!-- JS rendering -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== OFFICE VIEW (ADMIN/STAFF) ==================== -->
+        <div id="view-office" class="hide h-full flex bg-gray-50">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-white border-r flex flex-col shadow-sm">
+                <div class="p-5 border-b flex items-center space-x-2">
+                    <div class="bg-purple-100 text-purple-700 p-1.5 rounded-lg">
+                        <i data-lucide="shield" class="w-5 h-5"></i>
+                    </div>
+                    <span class="font-bold text-gray-800">Admin Office</span>
+                </div>
+                <nav class="p-4 space-y-1 flex-grow">
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 bg-indigo-50 text-indigo-700 font-semibold rounded-lg">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        <span>대시보드</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i data-lucide="video" class="w-4 h-4"></i>
+                        <span>콘텐츠 / 영상 관리</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i data-lucide="package" class="w-4 h-4"></i>
+                        <span>상품 관리</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+                        <span>주문 / 배송 관리</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                        <span>회원 / 권한 관리</span>
+                    </a>
+                    <a href="#" class="flex items-center space-x-3 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                        <span>매출 / 정산 관리</span>
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Office Main -->
+            <div class="flex-1 overflow-y-auto p-8">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-800">종합 대시보드</h2>
+                    <div class="text-sm text-gray-500">2026-07-12 18:10 기준</div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <div class="text-sm font-semibold text-gray-500 mb-2">금월 매출</div>
+                        <div class="text-3xl font-bold text-gray-900">₩12,345,000</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <div class="text-sm font-semibold text-gray-500 mb-2">신규 주문</div>
+                        <div class="text-3xl font-bold text-blue-600">412<span class="text-sm text-gray-400 font-normal ml-1">건</span></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <div class="text-sm font-semibold text-gray-500 mb-2">신규 가입자</div>
+                        <div class="text-3xl font-bold text-green-600">256<span class="text-sm text-gray-400 font-normal ml-1">명</span></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <div class="text-sm font-semibold text-gray-500 mb-2">승인 대기 건수</div>
+                        <div class="text-3xl font-bold text-orange-500">18<span class="text-sm text-gray-400 font-normal ml-1">건</span></div>
+                    </div>
+                </div>
+
+                <!-- Tables Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- 승인 대기함 -->
+                    <div class="bg-white rounded-xl border shadow-sm">
+                        <div class="p-5 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-gray-800">영상 매핑 / 게시 승인 대기</h3>
+                            <button class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded font-semibold">일괄 승인</button>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 text-gray-500 border-b">
+                                    <tr>
+                                        <th class="p-4 font-medium">유형</th>
+                                        <th class="p-4 font-medium">제목</th>
+                                        <th class="p-4 font-medium">요청자</th>
+                                        <th class="p-4 font-medium">상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-4"><span class="bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-bold">영상</span></td>
+                                        <td class="p-4 truncate max-w-[150px]">TOPIK 쓰기 기출 풀이</td>
+                                        <td class="p-4 text-gray-500">staff_cs</td>
+                                        <td class="p-4"><span class="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full text-xs">TAGGED</span></td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">상품</span></td>
+                                        <td class="p-4 truncate max-w-[150px]">한국 전통 간식 세트</td>
+                                        <td class="p-4 text-gray-500">staff_md</td>
+                                        <td class="p-4"><span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">PENDING</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 최근 주문 -->
+                    <div class="bg-white rounded-xl border shadow-sm">
+                        <div class="p-5 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-gray-800">최근 주문</h3>
+                            <a href="#" class="text-xs text-gray-500 hover:underline">전체 보기</a>
+                        </div>
+                        <div class="p-0">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 text-gray-500 border-b">
+                                    <tr>
+                                        <th class="p-4 font-medium">주문번호</th>
+                                        <th class="p-4 font-medium">금액</th>
+                                        <th class="p-4 font-medium">상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-4 font-mono text-gray-600">20260710-001</td>
+                                        <td class="p-4 font-semibold">₩34,000</td>
+                                        <td class="p-4"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs">결제완료</span></td>
+                                    </tr>
+                                    <tr class="border-b hover:bg-gray-50">
+                                        <td class="p-4 font-mono text-gray-600">20260710-002</td>
+                                        <td class="p-4 font-semibold">₩19,000</td>
+                                        <td class="p-4"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs">배송중</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Global Footer -->
+    <footer id="global-footer" class="bg-white border-t py-8 mt-auto">
+        <div class="container mx-auto px-4 text-center md:text-left text-gray-500 text-sm flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <div class="font-bold text-gray-800 mb-2">Ohseyokr (오세요코리아)</div>
+                <p>사업자등록번호: 123-45-67890 | 통신판매업신고: 제2026-서울-0000호</p>
+                <p>주소: 경기도 고양시 일산동구 | 이메일: support@ohseyokr.com</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-gray-800">이용약관</a>
+                <a href="#" class="hover:text-gray-800 font-semibold">개인정보처리방침</a>
+                <a href="#" class="hover:text-gray-800">FAQ</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- App Logic -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Application State & Logic (app.js 역할)
+        const app = {
+            state: {
+                isLoggedIn: false,
+                role: 'GUEST', // GUEST, MEMBER, STAFF, ADMIN
+                user: null
+            },
+            
+            data: {
+                videos: [
+                    { title: "TOPIK II 듣기 실전 모의고사 1회", level: "고급", time: "45:20", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=TOPIK+Listening" },
+                    { title: "한국어 문법 100선 총정리", level: "초중급", time: "1:20:15", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Grammar" },
+                    { title: "어휘 300제 벼락치기", level: "모든레벨", time: "30:00", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Vocabulary" },
+                    { title: "TOPIK 쓰기 원고지 작성법", level: "중급", time: "25:40", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Writing" }
+                ],
+                products: [
+                    { title: "K-뷰티 스킨케어 입문 세트", price: "₩34,000", badge: "BEST", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=K-Beauty" },
+                    { title: "한국 전통 간식 4종 세트", price: "₩19,000", badge: "NEW", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=K-Food" },
+                    { title: "TOPIK II 실전 기출 문제집", price: "₩17,000", badge: "추천", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=Book" },
+                    { title: "아이돌 굿즈 한글 공부 다이어리", price: "₩22,000", badge: "", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=Diary" }
+                ]
+            },
+
+            init() {
+                this.renderVideos();
+                this.renderProducts();
+                this.updateUI();
+            },
+
+            login(role) {
+                this.state.isLoggedIn = true;
+                this.state.role = role;
+                this.state.user = { name: role === 'ADMIN' ? '관리자' : 'Ohseyo' };
+                this.updateUI();
+                if(role === 'ADMIN') this.navigate('office');
+            },
+
+            logout() {
+                this.state.isLoggedIn = false;
+                this.state.role = 'GUEST';
+                this.state.user = null;
+                this.updateUI();
+                this.navigate('home');
+            },
+
+            navigate(view) {
+                document.getElementById('view-home').classList.add('hide');
+                document.getElementById('view-office').classList.add('hide');
+                document.getElementById('global-footer').classList.remove('hide');
+
+                if (view === 'home') {
+                    document.getElementById('view-home').classList.remove('hide');
+                } else if (view === 'office' && (this.state.role === 'ADMIN' || this.state.role === 'STAFF')) {
+                    document.getElementById('view-office').classList.remove('hide');
+                    document.getElementById('global-footer').classList.add('hide'); // 오피스 모드에선 푸터 숨김
+                }
+            },
+
+            updateUI() {
+                const { isLoggedIn, role } = this.state;
+                
+                // Header Nav
+                document.getElementById('nav-guest').classList.toggle('hide', isLoggedIn);
+                document.getElementById('nav-member').classList.toggle('hide', !isLoggedIn);
+                document.getElementById('menu-mypage').classList.toggle('hide', !isLoggedIn);
+                
+                // Office Button
+                document.getElementById('btn-office').classList.toggle('hide', !(isLoggedIn && (role === 'ADMIN' || role === 'STAFF')));
+
+                // Home Sections
+                document.getElementById('section-learning').classList.toggle('hide', !isLoggedIn);
+                document.getElementById('hero-greeting').innerText = isLoggedIn ? `${this.state.user.name}님, 오늘의 학습을 시작하세요` : '환영합니다';
+            },
+
+            renderVideos() {
+                const container = document.getElementById('video-list');
+                container.innerHTML = this.data.videos.map(v => `
+                    <div class="group cursor-pointer">
+                        <div class="relative overflow-hidden rounded-xl mb-3">
+                            <img src="${v.thumb}" alt="${v.title}" class="w-full object-cover transition transform group-hover:scale-105">
+                            <div class="absolute bottom-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">${v.time}</div>
+                        </div>
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-primary bg-indigo-50 px-2 py-0.5 rounded mb-1 inline-block">${v.level}</span>
+                                <h4 class="font-bold text-gray-800 text-sm line-clamp-2 group-hover:text-primary transition">${v.title}</h4>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            renderProducts() {
+                const container = document.getElementById('product-list');
+                container.innerHTML = this.data.products.map(p => `
+                    <div class="bg-white border rounded-xl overflow-hidden hover:shadow-lg transition group">
+                        <div class="relative aspect-square">
+                            <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover">
+                            ${p.badge ? `<div class="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded">${p.badge}</div>` : ''}
+                        </div>
+                        <div class="p-4">
+                            <h4 class="text-sm text-gray-700 mb-2 truncate">${p.title}</h4>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-gray-900">${p.price}</span>
+                                <button class="text-gray-400 hover:text-primary transition"><i data-lucide="shopping-cart" class="w-5 h-5"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                lucide.createIcons(); // 아이콘 재렌더링
+            }
+        };
+
+        // DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+    </script>
+</body>
+</html>
