@@ -321,24 +321,69 @@
             },
             
             data: {
-                videos: [
-                    { title: "TOPIK II 듣기 실전 모의고사 1회", level: "고급", time: "45:20", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=TOPIK+Listening" },
-                    { title: "한국어 문법 100선 총정리", level: "초중급", time: "1:20:15", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Grammar" },
-                    { title: "어휘 300제 벼락치기", level: "모든레벨", time: "30:00", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Vocabulary" },
-                    { title: "TOPIK 쓰기 원고지 작성법", level: "중급", time: "25:40", thumb: "https://placehold.co/400x225/Eef2ff/4f46e5?text=Writing" }
-                ],
-                products: [
-                    { title: "K-뷰티 스킨케어 입문 세트", price: "₩34,000", badge: "BEST", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=K-Beauty" },
-                    { title: "한국 전통 간식 4종 세트", price: "₩19,000", badge: "NEW", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=K-Food" },
-                    { title: "TOPIK II 실전 기출 문제집", price: "₩17,000", badge: "추천", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=Book" },
-                    { title: "아이돌 굿즈 한글 공부 다이어리", price: "₩22,000", badge: "", img: "https://placehold.co/300x300/f8fafc/94a3b8?text=Diary" }
-                ]
+                videos: [], // 빈 배열로 초기화
+                products: [] // 빈 배열로 초기화
             },
 
             init() {
-                this.renderVideos();
-                this.renderProducts();
+                this.loadVideos();
+                this.loadProducts();
                 this.updateUI();
+            },
+
+            // API 호출 함수 추가
+            async loadVideos() {
+                try {
+                    const response = await fetch('/api/contents/videos');
+                    if (!response.ok) throw new Error('네트워크 응답이 정상이 아닙니다.');
+                    const data = await response.json();
+                    
+                    // DB 컬럼명을 프론트엔드 형식에 맞게 변환 (필요시)
+                    // thumbnail_url -> thumb, duration_seconds -> time 등으로 매핑
+                    this.data.videos = data.map(v => ({
+                        title: v.title,
+                        level: v.topik_level || "모든레벨", // 예시 매핑
+                        time: this.formatTime(v.duration_seconds), // 초를 MM:SS 형식으로 변환하는 헬퍼 함수 필요
+                        thumb: v.thumbnail_url
+                    }));
+                    this.renderVideos();
+                } catch (error) {
+                    console.error('비디오 데이터를 불러오는 중 오류 발생:', error);
+                    document.getElementById('video-list').innerHTML = '<p class="text-red-500">데이터를 불러오지 못했습니다.</p>';
+                }
+            },
+
+            async loadProducts() {
+                try {
+                    const response = await fetch('/api/shop/products');
+                    if (!response.ok) throw new Error('네트워크 응답이 정상이 아닙니다.');
+                    const data = await response.json();
+
+                    // DB 컬럼명을 프론트엔드 형식에 맞게 변환 (필요시)
+                    // base_price -> price, thumbnail_url -> img
+                    this.data.products = data.map(p => ({
+                        title: p.name,
+                        price: `₩${Number(p.base_price).toLocaleString()}`, // 가격 포맷팅
+                        badge: "", // 필요한 로직에 따라 추가 (예: is_topik_recommended)
+                        img: p.thumbnail_url
+                    }));
+                    this.renderProducts();
+                } catch (error) {
+                    console.error('상품 데이터를 불러오는 중 오류 발생:', error);
+                    document.getElementById('product-list').innerHTML = '<p class="text-red-500">데이터를 불러오지 못했습니다.</p>';
+                }
+            },
+
+            // 헬퍼 함수: 초를 MM:SS로 변환 (예시)
+            formatTime(seconds) {
+                if(!seconds) return "00:00";
+                const h = Math.floor(seconds / 3600);
+                const m = Math.floor((seconds % 3600) / 60);
+                const s = seconds % 60;
+                
+                const format = (num) => String(num).padStart(2, '0');
+                if (h > 0) return `${format(h)}:${format(m)}:${format(s)}`;
+                return `${format(m)}:${format(s)}`;
             },
 
             login(role) {
@@ -388,6 +433,13 @@
 
             renderVideos() {
                 const container = document.getElementById('video-list');
+                
+                // 데이터가 없을 때 처리 추가
+                if (this.data.videos.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">등록된 영상이 없습니다.</p>';
+                    return;
+                }
+
                 container.innerHTML = this.data.videos.map(v => `
                     <div class="group cursor-pointer">
                         <div class="relative overflow-hidden rounded-xl mb-3">
@@ -406,6 +458,13 @@
 
             renderProducts() {
                 const container = document.getElementById('product-list');
+
+                // 데이터가 없을 때 처리 추가
+                if (this.data.products.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">등록된 상품이 없습니다.</p>';
+                    return;
+                }
+
                 container.innerHTML = this.data.products.map(p => `
                     <div class="bg-white border rounded-xl overflow-hidden hover:shadow-lg transition group">
                         <div class="relative aspect-square">
