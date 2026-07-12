@@ -1,9 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const db = require('./db');
+const path = require('path'); // ^^ path 모듈 추가
 
-dotenv.config();
+// ^^ 실행 위치가 루트 폴더로 바뀌더라도 backend 폴더 안의 .env를 정확히 찾도록 절대경로 설정
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
