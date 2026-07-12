@@ -4,12 +4,6 @@ const dotenv = require('dotenv');
 const path = require('path');
 
 
-// 또는 root 경로로 접속 시 index.html 서빙
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-
 // 로컬 환경을 위한 .env 설정 (Render에서는 Dashboard의 Env Vars가 우선 적용됨)
 dotenv.config({ path: path.join(__dirname, '.env') });
 
@@ -31,6 +25,11 @@ app.use(express.urlencoded({ extended: true }));
 // 'public' 폴더에 index.html을 넣고 아래와 같이 설정하거나,
 // 현재 파일 위치에 맞게 경로를 수정하세요.
 app.use(express.static(path.join(__dirname, 'public'))); 
+
+// 또는 root 경로로 접속 시 index.html 서빙
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Health Check Endpoint (Render 등에서 헬스체크용으로 사용)
 app.get('/health', (req, res) => {
