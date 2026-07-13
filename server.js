@@ -23,12 +23,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static assets from 'public' folder
+// HTML 파일을 / 로 접속했을 때 서빙하기 위해 추가 설정
 app.use(express.static(path.join(__dirname, 'public'))); 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Google OAuth Client Setup
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+// Render 환경 변수에서 가져오며, 누락 시 에러 방지를 위해 빈 문자열 허용 후 체크
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+if (!GOOGLE_CLIENT_ID) {
+    console.warn("⚠️ Warning: GOOGLE_CLIENT_ID is not set in environment variables!");
+}
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only';
-// Environment Variable for Admin ID (Email)
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || process.env.ADMIN_ID;
 
 // --- JWT Verification Middleware ---
@@ -59,13 +67,26 @@ const requireStaffOrAdmin = (req, res, next) => {
     next();
 };
 
-// --- Authentication Routes ---
+// --- 설정 및 설정 정보 전달 API ---
+// 프론트엔드에서 하드코딩 없이 Google Client ID를 받아갈 수 있도록 API 추가
+app.get('/api/public/config', (req, res) => {
+    res.json({
+        googleClientId: GOOGLE_CLIENT_ID
+    });
+});
+
+// --- Authentication Routes (로그인 & 회원가입 통합) ---
 app.post('/api/auth/google', async (req, res) => {
     const { credential } = req.body;
+    
+    if (!GOOGLE_CLIENT_ID) {
+        return res.status(500).json({ error: 'Server misconfiguration: Missing Google Client ID' });
+    }
+
     try {
         const ticket = await googleClient.verifyIdToken({
             idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID,
+            audience: GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
         const { sub, email, name, picture } = payload;
@@ -74,7 +95,7 @@ app.post('/api/auth/google', async (req, res) => {
         let user;
 
         if (userResult.rows.length === 0) {
-            // New user
+            // [회원가입 로직] 해당 이메일이 없으면 새로 생성
             // Check if this email matches the Admin Email Environment Variable
             const initialRole = (ADMIN_EMAIL && email === ADMIN_EMAIL) ? 'ADMIN' : 'MEMBER';
             
@@ -90,6 +111,7 @@ app.post('/api/auth/google', async (req, res) => {
                 [user.id, sub, email]
             );
         } else {
+            // [로그인 로직] 기존 유저 로그인 처리
             user = userResult.rows[0];
             
             // Auto Admin Promotion Check on Login
@@ -113,7 +135,7 @@ app.post('/api/auth/google', async (req, res) => {
         res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role, profile: user.profile_image_url } });
     } catch (error) {
         console.error('Google Auth Error:', error);
-        res.status(401).json({ error: 'Authentication failed' });
+        res.status(401).json({ error: '유효하지 않은 인증 정보입니다.' });
     }
 });
 
@@ -157,7 +179,6 @@ app.post('/api/office/approve', authenticateToken, requireStaffOrAdmin, async (r
 
 // --- Admin Center Routes ---
 
-// 1. 직원 검색 (Admin 전용)
 app.get('/api/admin/users/search', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const { q } = req.query;
@@ -176,7 +197,6 @@ app.get('/api/admin/users/search', authenticateToken, requireAdmin, async (req, 
     }
 });
 
-// 2. 현재 직원 목록 조회
 app.get('/api/admin/staff', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const staffList = await db.query(
@@ -193,12 +213,10 @@ app.get('/api/admin/staff', authenticateToken, requireAdmin, async (req, res) =>
     }
 });
 
-// 3. 직원 추가/권한 부여 (직급 설정)
 app.post('/api/admin/staff/add', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const { userId, position } = req.body;
         
-        // Admin 자신은 변경 불가 로직 등 필요시 추가
         const checkUser = await db.query('SELECT role, email FROM public.users WHERE id = $1', [userId]);
         if(checkUser.rows.length === 0) return res.status(404).json({error: 'User not found'});
         if(checkUser.rows[0].email === ADMIN_EMAIL) return res.status(400).json({error: '최고 관리자 권한은 수정할 수 없습니다.'});
@@ -213,7 +231,6 @@ app.post('/api/admin/staff/add', authenticateToken, requireAdmin, async (req, re
     }
 });
 
-// 4. 직원 해제 (회원으로 강등)
 app.post('/api/admin/staff/remove', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const { userId } = req.body;
@@ -233,7 +250,6 @@ app.post('/api/admin/staff/remove', authenticateToken, requireAdmin, async (req,
     }
 });
 
-// Admin 대시보드 통계 요약 (예시)
 app.get('/api/admin/summary', authenticateToken, requireAdmin, async (req, res) => {
     try {
         const userCount = await db.query("SELECT COUNT(*) FROM public.users");
@@ -279,7 +295,7 @@ async function initMockData() {
         `);
     }
 
-    console.content = "Mock data initialized successfully.";
+    console.log("Mock data initialized successfully.");
   } catch (err) {
     console.error("Failed to initialize mock data:", err);
   }
