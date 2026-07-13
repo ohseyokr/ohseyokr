@@ -109,12 +109,21 @@
 
                 <!-- Auth Area (Logged Out) -->
                 <div id="auth-area" class="flex items-center space-x-3">
-                    <div id="g_id_onload"
-                         data-client_id="YOUR_GOOGLE_CLIENT_ID_HERE"
-                         data-callback="handleGoogleLogin"
-                         data-auto_prompt="false">
+                     <!-- 
+                        중요: 클라이언트 ID는 백엔드에서 환경 변수로 관리하고,
+                        프론트엔드에서는 앱 초기화 시 백엔드 API를 호출하여 받아오도록 변경했습니다.
+                        이는 하드코딩된 'YOUR_GOOGLE_CLIENT_ID_HERE' 로 인한 invalid_client 오류를 방지합니다. 
+                    -->
+                    <div id="google-btn-container" class="hide">
+                        <div id="g_id_onload"
+                            data-callback="handleGoogleLogin"
+                            data-auto_prompt="false">
+                        </div>
+                        <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
                     </div>
-                    <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+                    <div id="google-loading-placeholder" class="text-xs text-gray-400 flex items-center">
+                        <i data-lucide="loader" class="w-4 h-4 animate-spin mr-2"></i>로그인 준비 중...
+                    </div>
                 </div>
 
                 <!-- Logged In User Area -->
@@ -532,8 +541,17 @@
 
     <!-- Application Script -->
     <script>
-        // Canvas Preview 환경(blob 프로토콜)에서는 상대 경로 fetch가 TypeError를 발생시키므로, 안전한 기본 도메인으로 대체합니다.
-        const API_URL = window.location.protocol === 'blob:' || window.location.origin === 'null' ? 'http://localhost:3000' : '';
+        // 현재 브라우저 URL 기반으로 동적으로 API URL 설정
+        const getApiUrl = () => {
+            const origin = window.location.origin;
+            if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+                return 'http://localhost:3000'; // 로컬 개발 환경
+            } else if (origin === 'null' || window.location.protocol === 'blob:') {
+                return 'http://localhost:3000'; // 파일 직접 열었을 때 (Fallback)
+            }
+            return origin; // Render 배포 환경 (프론트/백엔드 동일 도메인)
+        };
+        const API_URL = getApiUrl();
 
         // Global callback for Google GIS
         function handleGoogleLogin(response) {
@@ -549,10 +567,50 @@
                 adminSelectedUserForStaff: null
             },
 
-            init() {
+            async init() {
                 lucide.createIcons();
                 this.checkLocalAuth();
                 this.loadData();
+                await this.initGoogleAuth(); // Google 로그인 버튼 동적 초기화 추가
+            },
+
+            // 서버에서 Client ID를 받아와서 Google 로그인 버튼을 설정하는 함수
+            async initGoogleAuth() {
+                try {
+                    const res = await fetch(`${API_URL}/api/public/config`);
+                    if (res.ok) {
+                        const { googleClientId } = await res.json();
+                        if (googleClientId) {
+                            const gidOnload = document.getElementById('g_id_onload');
+                            gidOnload.setAttribute('data-client_id', googleClientId);
+                            
+                            // 스크립트가 로드될 수 있도록 약간의 딜레이 후 버튼 표시
+                            setTimeout(() => {
+                                document.getElementById('google-loading-placeholder').classList.add('hide');
+                                document.getElementById('google-btn-container').classList.remove('hide');
+                                
+                                // GSI 강제 재렌더링 시도 (이미 라이브러리가 로드된 경우를 대비)
+                                if (window.google && window.google.accounts && window.google.accounts.id) {
+                                     window.google.accounts.id.initialize({
+                                        client_id: googleClientId,
+                                        callback: handleGoogleLogin
+                                    });
+                                    window.google.accounts.id.renderButton(
+                                        document.querySelector('.g_id_signin'),
+                                        { theme: 'outline', size: 'large' }
+                                    );
+                                }
+                            }, 500);
+                        } else {
+                            throw new Error('Client ID not found');
+                        }
+                    } else {
+                        throw new Error('Failed to fetch config');
+                    }
+                } catch (e) {
+                    console.error('Google Auth Init Error:', e);
+                    document.getElementById('google-loading-placeholder').innerHTML = '<span class="text-red-500">로그인 서버 오류</span>';
+                }
             },
 
             showToast(message, type = 'info') {
@@ -648,10 +706,9 @@
                         document.getElementById('admin-stat-orders').textContent = data.totalOrders.toLocaleString() + '건';
                     } else throw new Error();
                 } catch(e) {
-                    // 미리보기(Mock) 데모 데이터 폴백
-                    document.getElementById('admin-stat-users').textContent = '1,204명';
-                    document.getElementById('admin-stat-products').textContent = '85개';
-                    document.getElementById('admin-stat-orders').textContent = '450건';
+                    document.getElementById('admin-stat-users').textContent = '-';
+                    document.getElementById('admin-stat-products').textContent = '-';
+                    document.getElementById('admin-stat-orders').textContent = '-';
                 }
             },
 
@@ -700,40 +757,7 @@
                         tbody.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-gray-400 font-medium">등록된 직원이 없습니다.</td></tr>`;
                     }
                 } catch(e) {
-                    // 미리보기(Mock) 데모 데이터 폴백
-                    tbody.innerHTML = `
-                        <tr class="hover:bg-gray-50/50 transition-colors group">
-                            <td class="px-8 py-5">
-                                <div class="flex items-center">
-                                    <img src="https://ui-avatars.com/api/?name=Admin&background=8b5cf6&color=fff" class="w-10 h-10 rounded-full mr-3 shadow-sm">
-                                    <div>
-                                        <div class="font-bold text-gray-900 text-[15px]">최고관리자 (Admin)</div>
-                                        <div class="text-gray-500 text-sm mt-0.5">admin@ohseyokr.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-5"><span class="inline-flex items-center bg-role-admin/10 text-role-admin px-2.5 py-1 rounded-md text-xs font-bold border border-role-admin/20"><i data-lucide="shield" class="w-3 h-3 mr-1"></i>ADMIN</span></td>
-                            <td class="px-6 py-5"><span class="font-medium text-gray-700">대표</span></td>
-                            <td class="px-6 py-5 text-gray-500 font-medium">2024. 1. 1.</td>
-                            <td class="px-8 py-5 text-right"><span class="text-xs text-gray-400 font-medium px-4">해제 불가</span></td>
-                        </tr>
-                        <tr class="hover:bg-gray-50/50 transition-colors group">
-                            <td class="px-8 py-5">
-                                <div class="flex items-center">
-                                    <img src="https://ui-avatars.com/api/?name=Staff&background=f59e0b&color=fff" class="w-10 h-10 rounded-full mr-3 shadow-sm">
-                                    <div>
-                                        <div class="font-bold text-gray-900 text-[15px]">운영매니저 (Staff)</div>
-                                        <div class="text-gray-500 text-sm mt-0.5">staff@ohseyokr.com</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-5"><span class="inline-flex items-center bg-role-staff/10 text-role-staff px-2.5 py-1 rounded-md text-xs font-bold border border-role-staff/20"><i data-lucide="briefcase" class="w-3 h-3 mr-1"></i>STAFF</span></td>
-                            <td class="px-6 py-5"><span class="font-medium text-gray-700">대리</span></td>
-                            <td class="px-6 py-5 text-gray-500 font-medium">2024. 3. 15.</td>
-                            <td class="px-8 py-5 text-right"><button onclick="app.adminRemoveStaff('mock_id')" class="text-red-500 hover:text-white hover:bg-red-500 text-sm font-bold px-4 py-2 rounded-lg border border-red-200 transition-all shadow-sm opacity-0 group-hover:opacity-100">권한 해제</button></td>
-                        </tr>
-                    `;
-                    lucide.createIcons();
+                     tbody.innerHTML = `<tr><td colspan="5" class="px-8 py-12 text-center text-red-400 font-medium">데이터를 불러오는데 실패했습니다.</td></tr>`;
                 }
             },
 
@@ -794,29 +818,7 @@
                         lucide.createIcons();
                     }
                 } catch(e) {
-                    // 미리보기(Mock) 데모 데이터 폴백
-                    resultList.innerHTML = `
-                        <li class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-brand/30 transition-colors gap-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold mr-3 border border-gray-200">데</div>
-                                <div>
-                                    <span class="font-bold text-gray-900">데모 회원</span>
-                                    <span class="inline-block ml-2 text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">demo_user@example.com</span>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2 w-full sm:w-auto">
-                                <select id="position-select-mock" class="flex-1 sm:flex-none text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-brand/20 focus:border-brand px-3 py-2 outline-none font-medium bg-gray-50">
-                                    <option value="사원">사원</option>
-                                    <option value="대리">대리</option>
-                                    <option value="팀장">팀장</option>
-                                </select>
-                                <button onclick="app.adminAddStaff('mock')" class="bg-brand/10 text-brand hover:bg-brand hover:text-white px-4 py-2 rounded-lg text-sm font-bold border border-brand/20 transition-all shadow-sm flex items-center whitespace-nowrap">
-                                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i>직원 임명
-                                </button>
-                            </div>
-                        </li>
-                    `;
-                    lucide.createIcons();
+                     resultList.innerHTML = `<li class="p-4 text-center text-red-500 font-medium">검색 중 오류가 발생했습니다.</li>`;
                 }
             },
 
@@ -831,14 +833,16 @@
                         },
                         body: JSON.stringify({ userId, position })
                     });
-                    if (!res.ok) throw new Error();
+                    if (!res.ok) {
+                         const err = await res.json();
+                         throw new Error(err.error || '임명 실패');
+                    }
                     this.showToast(`성공적으로 [${position}] 직급의 직원으로 임명되었습니다.`, 'success');
                     document.getElementById('admin-search-result-area').classList.add('hide');
                     document.getElementById('admin-staff-search-input').value = '';
                     this.loadAdminStaff();
                 } catch(e) {
-                    this.showToast(`미리보기 환경: 데모 계정이 [${position}] 직급 직원으로 임명되었습니다.`, 'success');
-                    document.getElementById('admin-search-result-area').classList.add('hide');
+                    this.showToast(e.message, 'error');
                 }
             },
 
@@ -853,11 +857,14 @@
                         },
                         body: JSON.stringify({ userId })
                     });
-                    if (!res.ok) throw new Error();
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.error || '해제 실패');
+                    }
                     this.showToast('해당 직원의 권한이 회수되었습니다.', 'success');
                     this.loadAdminStaff();
                 } catch(e) {
-                    this.showToast('미리보기 환경: 데모 계정의 직원 권한이 해제되었습니다.', 'success');
+                     this.showToast(e.message, 'error');
                 }
             },
 
@@ -888,9 +895,13 @@
                         localStorage.setItem('ohseyokr_user', JSON.stringify(data.user));
                         this.updateAuthUI();
                         this.showToast(`환영합니다, ${data.user.name}님!`, 'success');
-                    } else throw new Error('로그인 실패');
+                    } else {
+                         const err = await res.json();
+                         throw new Error(err.error || '로그인 실패');
+                    }
                 } catch (e) {
-                    this.showToast('미리보기 환경에서는 백엔드 서버 연동이 필요합니다.', 'error');
+                    console.error("Login process error:", e);
+                    this.showToast(e.message || '서버 연동 중 오류가 발생했습니다.', 'error');
                 }
             },
 
@@ -957,20 +968,9 @@
                     this.renderVideos(data.videos || []);
                     this.renderProducts(data.products || []);
                 } catch (e) {
-                    // 미리보기 환경을 위한 Fallback UI Data
-                    this.renderVideos([
-                        { youtube_id: 'P0s0N9QeX3Q', title: 'TOPIK II 쓰기 완벽 대비 (미리보기)' },
-                        { youtube_id: 'P0s0N9QeX3Q', title: '한국어 일상 회화 패턴 100 (미리보기)' },
-                        { youtube_id: 'P0s0N9QeX3Q', title: 'TOPIK 1급 기초 단어 모음 (미리보기)' },
-                        { youtube_id: 'P0s0N9QeX3Q', title: 'K-Drama로 배우는 한국어 (미리보기)' }
-                    ]);
-                    this.renderProducts([
-                        { id: 'mock1', name: '인기 K-뷰티 수분 마스크팩 10매 세트', price: 25000, image_url: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&q=80&w=600&h=600' },
-                        { id: 'mock2', name: 'TOPIK 한 권으로 끝내기 (1급~2급)', price: 18000, image_url: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=600&h=600' },
-                        { id: 'mock3', name: '트렌디한 서울 스트릿 볼캡', price: 32000, image_url: 'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&q=80&w=600&h=600' },
-                        { id: 'mock4', name: '아이돌 메이크업 필수템 글리터 섀도우', price: 15000, image_url: 'https://images.unsplash.com/photo-1512496015851-a1dc8a477366?auto=format&fit=crop&q=80&w=600&h=600' },
-                        { id: 'mock5', name: '맛있는 한국 전통 간식 약과 세트', price: 22000, image_url: 'https://images.unsplash.com/photo-1635363638580-c2809d049eee?auto=format&fit=crop&q=80&w=600&h=600' }
-                    ]);
+                     console.error("Data load error:", e);
+                     const grid = document.getElementById('video-grid');
+                     grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-400">데이터를 불러오는 중 오류가 발생했습니다.</div>';
                 }
             },
 
@@ -988,9 +988,6 @@
                                 <div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(220,38,38,0.5)] transform group-hover:scale-110 transition-transform duration-300">
                                     <i data-lucide="play" class="w-6 h-6 text-white ml-1 fill-white"></i>
                                 </div>
-                            </div>
-                            <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
-                                10:24
                             </div>
                         </div>
                         <div class="p-5 flex-grow">
@@ -1040,14 +1037,7 @@
                     this.renderPendingList('pending-products-list', 'pending-prod-count', data.pendingProducts, '상품', 'package');
                     this.renderPendingList('pending-videos-list', 'pending-vid-count', data.pendingVideos, '영상', 'film');
                 } catch(e) {
-                    // 미리보기(Mock) 데모 데이터 폴백
-                    this.renderPendingList('pending-products-list', 'pending-prod-count', [
-                        { name: 'K-뷰티 신상 아이섀도우 팔레트', created_at: new Date().toISOString() },
-                        { name: '아이돌 포토카드 바인더 세트', created_at: new Date(Date.now() - 86400000).toISOString() }
-                    ], '상품', 'package');
-                    this.renderPendingList('pending-videos-list', 'pending-vid-count', [
-                        { title: 'TOPIK II 읽기 기출문제 풀이', created_at: new Date().toISOString() }
-                    ], '영상', 'film');
+                     this.showToast('데이터를 불러오는데 실패했습니다.', 'error');
                 }
             },
 
@@ -1096,7 +1086,7 @@
                     this.loadData(); 
                     this.loadOfficeData();
                 } catch(e) { 
-                    this.showToast('미리보기 환경: 데모 승인이 완료되었습니다.', 'success');
+                    this.showToast('승인 처리 중 오류가 발생했습니다.', 'error');
                 }
             },
 
@@ -1188,7 +1178,7 @@
                 this.state.cart = [];
                 this.updateCartUI();
                 this.toggleCart();
-                this.showToast('🎉 결제가 성공적으로 완료되었습니다! (데모)', 'success');
+                this.showToast('🎉 결제가 성공적으로 완료되었습니다!', 'success');
             }
         };
 
