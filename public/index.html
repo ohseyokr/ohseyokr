@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ohseyokr | TOPIK 학습 & K-Goods 쇼핑</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons CDN -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Identity Services (동적 로드를 위해 async 제거 후 JS에서 처리) -->
+    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client"></script>
-    <!-- Pretendard Premium Font -->
+    <!-- Pretendard Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
     <script>
@@ -18,11 +18,11 @@
             theme: {
                 extend: {
                     colors: {
-                        'brand': '#2563eb', // Blue-600
-                        'brand-hover': '#1d4ed8', // Blue-700
-                        'role-member': '#10b981', // Emerald-500
-                        'role-staff': '#f59e0b', // Amber-500
-                        'role-admin': '#8b5cf6', // Violet-500
+                        'brand': '#4358ff', // 와이어프레임 스타일의 파란색
+                        'brand-hover': '#3242cc',
+                        'role-member': '#10b981', 
+                        'role-staff': '#f97316', // Orange
+                        'role-admin': '#6366f1', // Indigo
                         'surface': '#ffffff',
                         'background': '#f8fafc',
                     },
@@ -32,6 +32,7 @@
                     boxShadow: {
                         'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
                         'card': '0 0 0 1px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04)',
+                        'floating': '0 10px 40px -10px rgba(0,0,0,0.08)',
                     }
                 }
             }
@@ -52,19 +53,21 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Sidebar Active State */
-        .sidebar-menu-active { 
-            background-color: #f3f4f6; 
-            color: theme('colors.brand'); 
-            font-weight: 700; 
-        }
-        .sidebar-menu-active i { color: theme('colors.brand'); }
+        /* Active States for Sidebars */
+        .sidebar-mypage-active { background-color: #f3f4f6; color: theme('colors.gray.900'); font-weight: 700; border-left: 3px solid theme('colors.brand'); }
+        .sidebar-office-active { background-color: #fff7ed; color: theme('colors.orange.600'); font-weight: 700; border-left: 3px solid theme('colors.orange.500'); }
+        .sidebar-admin-active { background-color: #eef2ff; color: theme('colors.indigo.600'); font-weight: 700; border-left: 3px solid theme('colors.indigo.500'); }
 
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-4px); box-shadow: theme('boxShadow.soft'); }
 
-        /* Full height layout for dashboard views */
         .dashboard-layout { min-height: calc(100vh - 64px); }
+        
+        /* Chart Mockups */
+        .progress-bar-bg { width: 100%; background-color: #e2e8f0; border-radius: 9999px; height: 0.5rem; overflow: hidden; }
+        .progress-bar-fill { background-color: theme('colors.brand'); height: 100%; border-radius: 9999px; }
+        .donut-mockup { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(theme('colors.brand') 0% 42%, #e2e8f0 42% 100%); display: flex; align-items: center; justify-content: center; }
+        .donut-inner { width: 80px; height: 80px; border-radius: 50%; background-color: white; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen overflow-x-hidden">
@@ -79,64 +82,75 @@
 
     <!-- Header -->
     <header class="bg-surface shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <!-- Logo & Main Menu -->
             <div class="flex items-center space-x-8">
                 <div class="flex items-center space-x-2 cursor-pointer group" onclick="app.ui.switchView('view-home')">
-                    <div class="w-9 h-9 bg-gradient-to-br from-brand to-blue-400 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                        <span class="text-white font-black text-xl leading-none">O</span>
-                    </div>
-                    <span class="text-2xl font-black tracking-tight text-gray-900 hidden sm:block">Ohseyokr</span>
+                    <span class="text-2xl font-black tracking-tighter text-gray-900">OHSEYOKR<span class="text-brand">.</span></span>
                 </div>
                 <nav class="hidden md:flex space-x-6">
-                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">TOPIK 영상</a>
-                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">K-Goods</a>
-                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">공지사항</a>
+                    <a href="#" class="text-gray-800 hover:text-brand font-bold text-sm transition-colors flex items-center"><i data-lucide="home" class="w-4 h-4 mr-1.5"></i>홈</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 font-bold text-sm transition-colors">TOPIK 영상</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 font-bold text-sm transition-colors">K-Goods</a>
+                    <a href="#" class="text-gray-500 hover:text-gray-900 font-bold text-sm transition-colors">공지사항</a>
                 </nav>
             </div>
             
-            <!-- Global Search (Desktop) -->
+            <!-- Global Search -->
             <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
                 </div>
-                <input type="text" class="block w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none" placeholder="검색어 입력">
+                <input type="text" class="block w-full pl-11 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none" placeholder="검색어 입력">
             </div>
 
             <!-- Right Actions -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-3">
                 <!-- Shopping Cart -->
-                <button onclick="app.ui.toggleCart()" class="relative p-2 text-gray-600 hover:text-brand transition-colors rounded-full hover:bg-gray-50 focus:outline-none">
+                <button onclick="app.ui.toggleCart()" class="relative p-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50 focus:outline-none">
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    <span id="cart-badge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hide ring-2 ring-white shadow-sm">0</span>
+                    <span id="cart-badge" class="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hide ring-2 ring-white shadow-sm">0</span>
                 </button>
 
                 <!-- Auth Area -->
-                <div id="auth-area" class="flex items-center">
-                    <!-- Google Login Button Container -->
-                    <div id="google-login-btn-wrapper"></div>
+                <div id="auth-area" class="flex items-center ml-2">
+                    <div id="google-login-btn-wrapper" class="overflow-hidden rounded-lg"></div>
                 </div>
 
                 <!-- Logged In User Area -->
-                <div id="user-area" class="hide flex items-center space-x-3 border-l border-gray-200 pl-4">
-                    <div class="flex items-center cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition-colors" onclick="app.ui.switchView('view-mypage')">
-                        <img id="user-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full border border-gray-200 shadow-sm object-cover">
-                        <div class="hidden lg:flex flex-col ml-2.5">
-                            <span id="user-name" class="text-sm font-bold text-gray-800 leading-none">Name</span>
-                            <span id="user-role-badge" class="text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm bg-role-member leading-none mt-1 w-max">GUEST</span>
-                        </div>
-                    </div>
-                    
+                <div id="user-area" class="hide flex items-center space-x-2 border-l border-gray-200 pl-4 ml-2">
                     <div class="flex items-center space-x-1.5">
-                        <button id="nav-office" class="hide bg-role-staff/10 text-role-staff hover:bg-role-staff hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.ui.switchView('view-office')">
-                            <i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5"></i>Office
+                        <button id="nav-office" class="hide text-role-staff hover:bg-orange-50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center border border-orange-100 bg-white" onclick="app.ui.switchView('view-office')">
+                            <i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5"></i>OFFICE
                         </button>
-                        <button id="nav-admin" class="hide bg-role-admin/10 text-role-admin hover:bg-role-admin hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.ui.switchView('view-admin')">
-                            <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1.5"></i>Admin
+                        <button id="nav-admin" class="hide text-role-admin hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center border border-indigo-100 bg-white" onclick="app.ui.switchView('view-admin')">
+                            <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1.5"></i>ADMIN
                         </button>
-                        <button onclick="app.auth.logout()" class="flex items-center text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-gray-200 hover:border-red-200 ml-1" title="로그아웃">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i><span class="hidden md:inline ml-1.5">로그아웃</span>
-                        </button>
+                    </div>
+
+                    <div class="relative group">
+                        <div class="flex items-center cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition-colors border border-transparent hover:border-gray-200" onclick="app.ui.switchView('view-mypage')">
+                            <img id="user-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full border border-gray-200 object-cover bg-white">
+                            <div class="hidden lg:flex flex-col ml-2 text-left">
+                                <span id="user-name" class="text-sm font-bold text-gray-800 leading-none">User</span>
+                                <span class="text-[10px] text-gray-400 mt-0.5">마이페이지</span>
+                            </div>
+                        </div>
+                        <!-- Dropdown -->
+                        <div class="absolute right-0 mt-1 w-48 bg-white rounded-xl shadow-floating border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                            <div class="p-3 border-b border-gray-100">
+                                <p class="text-xs text-gray-500 font-bold mb-1">내 계정</p>
+                                <p id="user-email-display" class="text-sm font-medium text-gray-900 truncate">email@example.com</p>
+                            </div>
+                            <div class="p-2">
+                                <button onclick="app.ui.switchView('view-mypage')" class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center">
+                                    <i data-lucide="user" class="w-4 h-4 mr-2 text-gray-400"></i>마이페이지
+                                </button>
+                                <button onclick="app.auth.logout()" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium flex items-center mt-1">
+                                    <i data-lucide="log-out" class="w-4 h-4 mr-2 text-red-400"></i>로그아웃
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,288 +163,454 @@
         <!-- ==================== 1. 비회원/회원 홈 (Home) ==================== -->
         <section id="view-home" class="flex-grow pb-20 view-section">
             <!-- Hero Banner -->
-            <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                <div class="relative bg-blue-50 rounded-3xl overflow-hidden shadow-sm aspect-[16/9] md:aspect-[21/6] flex items-center border border-blue-100">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-transparent"></div>
-                    <div class="relative z-10 px-8 md:px-16 lg:px-24 flex-1">
-                        <span class="inline-block py-1 px-3 rounded-full bg-brand text-white text-xs font-bold tracking-wider mb-4 shadow-sm">오세요코리아</span>
-                        <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight tracking-tight">
+            <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+                <div class="bg-gradient-to-r from-[#eef2ff] to-[#f8fafc] rounded-3xl overflow-hidden flex flex-col md:flex-row items-center justify-between p-8 md:p-16 border border-indigo-50/50">
+                    <div class="flex-1 md:pr-12">
+                        <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-brand text-xs font-bold tracking-wider mb-6">오세요코리아</span>
+                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 leading-[1.1] tracking-tight">
                             토픽 합격의 시작,<br>
                             <span class="text-brand">Ohseyokr</span>와 함께하세요
                         </h1>
-                        <p class="text-gray-600 mb-8 font-medium">무료 강의로 실력을 키우고, K-굿즈로 한국을 더 가까이 경험해보세요.</p>
-                        <div class="flex space-x-3">
-                            <button class="bg-brand hover:bg-brand-hover text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all">무료로 시작하기</button>
-                            <button class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-bold transition-all shadow-sm">샘플 강의 보기</button>
+                        <p class="text-gray-600 mb-10 font-medium text-lg">무료 강의로 실력을 키우고, K-굿즈로 한국을 더 가까이 경험해보세요.</p>
+                        <div class="flex space-x-4">
+                            <button class="bg-brand hover:bg-brand-hover text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-brand/20 transition-all text-sm">무료로 시작하기</button>
+                            <button class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-xl font-bold transition-all shadow-sm text-sm">샘플 강의 보기</button>
                         </div>
                     </div>
-                    <!-- Hero Graphics placeholder -->
-                    <div class="hidden md:flex flex-1 justify-center items-center gap-4 pr-16">
-                        <div class="w-48 h-48 bg-brand rounded-2xl shadow-lg flex items-center justify-center transform -rotate-6"><span class="text-white font-black text-2xl">TOPIK Study</span></div>
-                        <div class="w-48 h-48 bg-gray-100 rounded-2xl shadow-lg flex items-center justify-center transform rotate-6 border border-gray-200"><span class="text-gray-400 font-black text-2xl">K-Goods</span></div>
+                    <!-- Hero Graphics -->
+                    <div class="hidden md:flex flex-1 justify-end items-center gap-6 mt-10 md:mt-0">
+                        <div class="w-64 h-64 bg-brand rounded-3xl shadow-xl shadow-brand/20 flex flex-col items-center justify-center transform -translate-y-4 hover:-translate-y-6 transition-transform cursor-pointer relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent"></div>
+                            <i data-lucide="play-circle" class="w-16 h-16 text-white mb-4 relative z-10 opacity-90"></i>
+                            <span class="text-white font-black text-2xl relative z-10">TOPIK Study</span>
+                        </div>
+                        <div class="w-56 h-56 bg-gray-100 rounded-3xl shadow-lg border border-gray-200 flex flex-col items-center justify-center transform translate-y-8 hover:translate-y-6 transition-transform cursor-pointer">
+                            <i data-lucide="shopping-bag" class="w-12 h-12 text-gray-400 mb-3"></i>
+                            <span class="text-gray-500 font-black text-xl">K-Goods</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <!-- Content Sections -->
+            <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20">
                 <!-- Video Section -->
-                <div class="mb-16">
-                    <div class="flex items-center mb-6">
-                        <div class="w-1.5 h-6 bg-brand rounded-full mr-3"></div>
-                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">인기 토픽 영상</h2>
+                <div class="mb-24">
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center border-l-4 border-brand pl-3">
+                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">인기 토픽 영상</h2>
+                        </div>
+                        <a href="#" class="text-sm font-bold text-gray-500 hover:text-brand flex items-center">더보기 <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
                     </div>
-                    <div id="home-video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div id="home-video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <!-- JS Rendered -->
                     </div>
                 </div>
 
                 <!-- Product Section -->
                 <div>
-                    <div class="flex items-center mb-6">
-                        <div class="w-1.5 h-6 bg-brand rounded-full mr-3"></div>
-                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">추천 K-Goods</h2>
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center border-l-4 border-brand pl-3">
+                            <h2 class="text-2xl font-black text-gray-900 tracking-tight">추천 K-Goods</h2>
+                        </div>
+                        <a href="#" class="text-sm font-bold text-gray-500 hover:text-brand flex items-center">더보기 <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i></a>
                     </div>
-                    <div id="home-product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                    <div id="home-product-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         <!-- JS Rendered -->
                     </div>
                 </div>
             </div>
             
-            <!-- Footer Simple -->
-            <footer class="border-t border-gray-200 bg-white mt-10 py-10">
-                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-                    <div class="mb-4 md:mb-0">
-                        <p class="font-bold text-gray-800 text-base mb-1">Ohseyokr (오세요코리아)</p>
-                        <p>사업자등록번호: 123-45-67890 | 통신판매업신고: 제2024-서울-0000호</p>
-                        <p>이메일: support@ohseyokr.com</p>
+            <!-- Newsletter & Footer -->
+            <footer class="border-t border-gray-100 bg-white pt-16 pb-8">
+                <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+                    <!-- Newsletter -->
+                    <div class="bg-gray-50 rounded-2xl p-8 mb-16 flex flex-col md:flex-row items-center justify-between border border-gray-100">
+                        <div class="mb-6 md:mb-0">
+                            <h3 class="font-black text-xl text-gray-900 mb-2">Ohseyokr 소식 받기</h3>
+                            <p class="text-sm text-gray-500">이메일을 등록하고 다양한 소식을 받아보세요.</p>
+                        </div>
+                        <div class="flex w-full md:w-auto max-w-md">
+                            <input type="email" placeholder="이메일 입력" class="flex-1 px-4 py-3 rounded-l-xl border border-gray-300 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand text-sm">
+                            <button class="bg-gray-800 text-white px-6 py-3 rounded-r-xl font-bold text-sm hover:bg-gray-900 transition-colors">구독하기</button>
+                        </div>
                     </div>
-                    <div class="text-xs bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <p class="font-bold text-gray-700 mb-1">Google OAuth 연동됨</p>
-                        <p>자동 회원가입 및 로그인<br>JWT 기반 세션 보안 적용 완료</p>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12 text-sm text-gray-600">
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-4">고객센터</h4>
+                            <ul class="space-y-2"><li><a href="#">공지사항</a></li><li><a href="#">FAQ</a></li><li><a href="#">1:1 문의</a></li></ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-4">이용안내</h4>
+                            <ul class="space-y-2"><li><a href="#">이용약관</a></li><li><a href="#" class="font-bold text-gray-800">개인정보처리방침</a></li><li><a href="#">배송/환불 안내</a></li></ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-4">회사정보</h4>
+                            <ul class="space-y-2"><li><a href="#">회사소개</a></li><li><a href="#">제휴문의</a></li></ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 mb-4">SNS</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-gray-400 hover:text-gray-900"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-gray-900"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                                <a href="#" class="text-gray-400 hover:text-gray-900"><i data-lucide="facebook" class="w-5 h-5"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
+                        <div>
+                            <p class="font-bold text-gray-500 mb-1">Ohseyokr (오세요코리아)</p>
+                            <p>사업자등록번호: 123-45-67890 | 통신판매업신고: 제2024-서울-0000호</p>
+                            <p>주소: 경기도 고양시 일산동구 | 이메일: support@ohseyokr.com</p>
+                            <p class="mt-4">© 2024 Ohseyokr. All rights reserved.</p>
+                        </div>
+                        <div class="mt-4 md:mt-0 flex space-x-2">
+                            <span class="bg-gray-100 px-3 py-1.5 rounded-lg text-gray-500 font-medium flex items-center"><i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1.5"></i>안전결제</span>
+                            <span class="bg-gray-100 px-3 py-1.5 rounded-lg text-gray-500 font-medium flex items-center"><i data-lucide="lock" class="w-3.5 h-3.5 mr-1.5"></i>보안서버</span>
+                        </div>
                     </div>
                 </div>
             </footer>
         </section>
 
         <!-- ==================== 2. 회원 (마이페이지) ==================== -->
-        <section id="view-mypage" class="hide flex-grow flex dashboard-layout view-section">
+        <section id="view-mypage" class="hide flex-grow flex dashboard-layout view-section bg-[#f9fafb]">
             <aside class="w-64 bg-white border-r border-gray-200 flex-col hidden md:flex shrink-0">
-                <div class="p-6 pb-2"><h2 class="text-lg font-black text-gray-900">마이페이지</h2></div>
-                <nav class="flex-1 py-4 flex flex-col gap-1 px-4" id="mypage-nav">
-                    <button class="sidebar-menu-btn sidebar-menu-active flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'dashboard', this)">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i>대시보드
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'study', this)">
-                        <i data-lucide="book-open" class="w-4 h-4 mr-3"></i>학습현황
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'orders', this)">
-                        <i data-lucide="shopping-bag" class="w-4 h-4 mr-3"></i>주문내역
-                    </button>
+                <div class="p-6 pb-4 border-b border-gray-50"><h2 class="text-xl font-black text-gray-900">마이페이지</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-4 overflow-y-auto" id="mypage-nav">
+                    <button class="sidebar-menu-btn sidebar-mypage-active flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'dashboard', this)">대시보드</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'study', this)">학습현황</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'orders', this)">주문내역</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'points', this)">포인트</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'coupons', this)">쿠폰</button>
                     <div class="my-2 border-t border-gray-100"></div>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'profile', this)">
-                        <i data-lucide="user" class="w-4 h-4 mr-3"></i>개인정보
-                    </button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'profile', this)">개인정보</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'shipping', this)">배송지 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'inquiry', this)">문의내역</button>
                 </nav>
             </aside>
-            <div class="flex-1 p-6 md:p-10 bg-background overflow-y-auto">
-                <div id="mypage-tab-dashboard" class="mypage-tab-content block max-w-5xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">안녕하세요, <span id="mypage-welcome-name" class="text-brand">회원</span>님!</h3>
+            <div class="flex-1 p-8 md:p-10 overflow-y-auto">
+                
+                <!-- 2.1 마이페이지 - 대시보드 -->
+                <div id="mypage-tab-dashboard" class="mypage-tab-content block max-w-[1000px] mx-auto">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8 flex items-center justify-between">
+                        <div class="flex items-center space-x-6">
+                            <img id="mypage-dash-avatar" src="" class="w-20 h-20 rounded-full bg-gray-100 border border-gray-200 object-cover">
+                            <div>
+                                <h3 class="text-2xl font-black text-gray-900 mb-1">안녕하세요, <span id="mypage-dash-name" class="text-brand">Ohseyo</span> 님!</h3>
+                                <p class="text-gray-500 text-sm">오늘도 즐거운 학습과 쇼핑 되세요.</p>
+                                <div class="flex space-x-2 mt-3">
+                                    <span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide">회원등급: SILVER</span>
+                                    <span class="bg-gray-100 text-gray-600 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide">가입일: 2024-03-15</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
-                            <span class="text-gray-500 text-sm font-bold mb-2">보유 포인트</span>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 text-center">
+                            <span class="text-gray-500 text-xs font-bold block mb-2">보유 포인트</span>
                             <span class="text-2xl font-black text-gray-900">12,500P</span>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
-                            <span class="text-gray-500 text-sm font-bold mb-2">쿠폰</span>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 text-center">
+                            <span class="text-gray-500 text-xs font-bold block mb-2">쿠폰</span>
                             <span class="text-2xl font-black text-gray-900">3장</span>
                         </div>
-                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
-                            <span class="text-gray-500 text-sm font-bold mb-2">진행 중 주문</span>
-                            <span class="text-2xl font-black text-brand">1건</span>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 text-center">
+                            <span class="text-gray-500 text-xs font-bold block mb-2">완강 클래스</span>
+                            <span class="text-2xl font-black text-gray-900">24개</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 text-center">
+                            <span class="text-gray-500 text-xs font-bold block mb-2">최근 본 상품</span>
+                            <span class="text-2xl font-black text-gray-900">16개</span>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-bold text-gray-900">최근 주문 현황</h4>
-                            <a href="#" class="text-xs text-gray-500 hover:text-brand">더보기 ></a>
-                        </div>
-                        <div class="border border-gray-200 rounded-xl p-4 flex items-center justify-between text-sm">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-gray-400 text-xs">2024-05-07-0001</span>
-                                <span class="font-bold text-gray-800">한국 정통 홍삼 진액 에디션 세트</span>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-bold text-gray-900">내 학습 현황 요약</h4>
+                                <a href="#" onclick="app.ui.switchTab('mypage', 'study', document.querySelector('[onclick*=\\\'study\\\']'))" class="text-xs text-gray-400 hover:text-brand">더보기 ></a>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <span class="font-black text-gray-900">68,000원</span>
-                                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">배송준비</span>
+                            <div class="border border-gray-100 rounded-xl p-6 bg-gray-50/50 flex flex-col items-center mb-4">
+                                <span class="text-sm text-gray-500 font-bold mb-1">현재 레벨</span>
+                                <span class="text-xl font-black text-brand mb-4">Intermediate</span>
+                                <div class="w-full">
+                                    <div class="flex justify-between text-xs text-gray-500 font-bold mb-2"><span>진도율</span><span>42%</span></div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: 42%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-bold text-gray-900">최근 주문 현황</h4>
+                                <a href="#" onclick="app.ui.switchTab('mypage', 'orders', document.querySelector('[onclick*=\\\'orders\\\']'))" class="text-xs text-gray-400 hover:text-brand">더보기 ></a>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="border border-gray-100 rounded-xl p-4 flex justify-between items-center bg-gray-50/50">
+                                    <div>
+                                        <p class="text-[10px] text-gray-400 mb-1">2024-05-07-0001</p>
+                                        <p class="font-bold text-gray-800 text-sm">K-뷰티 스킨케어 4종 세트</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-black text-gray-900 text-sm mb-1">₩54,000</p>
+                                        <span class="bg-brand/10 text-brand px-2 py-0.5 rounded text-[10px] font-bold">배송준비</span>
+                                    </div>
+                                </div>
+                                <div class="border border-gray-100 rounded-xl p-4 flex justify-between items-center bg-gray-50/50">
+                                    <div>
+                                        <p class="text-[10px] text-gray-400 mb-1">2024-05-03-0002</p>
+                                        <p class="font-bold text-gray-800 text-sm">한국 전통 간식 4종 세트</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-black text-gray-900 text-sm mb-1">₩19,000</p>
+                                        <span class="bg-gray-200 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">배송완료</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <div id="mypage-tab-study" class="mypage-tab-content hide max-w-5xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">학습 현황</h3>
-                    <div class="bg-white p-12 rounded-2xl shadow-card border border-gray-100 text-center text-gray-500">학습 기록 연동 준비 중입니다.</div>
+                <!-- 2.2 학습현황 등 기타 탭들 (간략화된 UI 구조) -->
+                <div id="mypage-tab-study" class="mypage-tab-content hide max-w-[1000px] mx-auto">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">학습 현황</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-400 py-20">학습 통계 데이터 연동 중입니다.</div>
                 </div>
-                <div id="mypage-tab-orders" class="mypage-tab-content hide max-w-5xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">주문 내역</h3>
-                    <div class="bg-white p-12 rounded-2xl shadow-card border border-gray-100 text-center text-gray-500">주문 내역이 없습니다.</div>
+                <div id="mypage-tab-orders" class="mypage-tab-content hide max-w-[1000px] mx-auto">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">주문내역</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center text-gray-400 py-20">주문 내역이 없습니다.</div>
                 </div>
-                <div id="mypage-tab-profile" class="mypage-tab-content hide max-w-5xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">개인정보</h3>
-                    <div class="bg-white p-8 rounded-2xl shadow-card border border-gray-100 max-w-2xl">
-                        <div class="flex items-center space-x-6 mb-8 border-b border-gray-100 pb-8">
-                            <img id="mypage-profile-img" src="" class="w-20 h-20 rounded-full border border-gray-200 bg-gray-50">
-                            <div>
-                                <h4 id="mypage-profile-name" class="font-black text-xl text-gray-900">Name</h4>
-                                <p id="mypage-profile-email" class="text-gray-500 text-sm mt-1">email@example.com</p>
-                                <span class="inline-block mt-2 bg-blue-50 text-brand px-2 py-0.5 rounded text-xs font-bold border border-blue-100">Google 연동됨</span>
-                            </div>
+                <div id="mypage-tab-points" class="mypage-tab-content hide max-w-[1000px] mx-auto">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">포인트</h3>
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex items-center justify-between mb-6 bg-brand/5 border-brand/20">
+                        <div>
+                            <p class="text-sm font-bold text-gray-600 mb-2">보유 포인트</p>
+                            <p class="text-4xl font-black text-brand">12,500 <span class="text-xl">P</span></p>
+                        </div>
+                        <i data-lucide="coins" class="w-16 h-16 text-brand/20"></i>
+                    </div>
+                </div>
+                <div id="mypage-tab-coupons" class="mypage-tab-content hide max-w-[1000px] mx-auto">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">쿠폰</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white border border-gray-200 rounded-xl p-6 flex justify-between items-center shadow-sm">
+                            <div><p class="font-black text-lg text-gray-900 mb-1">10% 할인 쿠폰</p><p class="text-xs text-gray-500">최대 10,000원 할인</p></div>
+                            <button class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold">사용하기</button>
                         </div>
                     </div>
                 </div>
+                <!-- 2.6 개인정보 -->
+                <div id="mypage-tab-profile" class="mypage-tab-content hide max-w-[1000px] mx-auto">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">개인정보</h3>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+                        <div class="flex items-center space-x-6 mb-8 border-b border-gray-100 pb-8">
+                            <img id="mypage-profile-img" src="" class="w-20 h-20 rounded-full border border-gray-200 bg-gray-50 object-cover">
+                            <div>
+                                <h4 id="mypage-profile-name" class="font-black text-xl text-gray-900">Name</h4>
+                                <p id="mypage-profile-email" class="text-gray-500 text-sm mt-1">email@example.com</p>
+                                <span class="inline-flex items-center mt-2 bg-blue-50 text-brand px-2 py-1 rounded text-[10px] font-bold border border-blue-100"><i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>Google 연동됨</span>
+                            </div>
+                        </div>
+                        <div class="space-y-4 max-w-lg">
+                            <div><label class="block text-xs font-bold text-gray-500 mb-1">이름</label><input type="text" id="mypage-input-name" disabled class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700"></div>
+                            <div><label class="block text-xs font-bold text-gray-500 mb-1">이메일</label><input type="text" id="mypage-input-email" disabled class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="mypage-tab-shipping" class="mypage-tab-content hide max-w-[1000px] mx-auto"><h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">배송지 관리</h3><div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center text-gray-400">등록된 배송지가 없습니다.</div></div>
+                <div id="mypage-tab-inquiry" class="mypage-tab-content hide max-w-[1000px] mx-auto"><h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-200 pb-4">문의내역</h3><div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-200 text-center text-gray-400">문의 내역이 없습니다.</div></div>
             </div>
         </section>
 
         <!-- ==================== 3. 직원 (Office) ==================== -->
-        <section id="view-office" class="hide flex-grow flex dashboard-layout view-section">
-            <aside class="w-64 bg-[#2b2d36] text-gray-300 flex-col hidden md:flex shrink-0">
-                <div class="p-6 pb-2 border-b border-gray-700/50"><h2 class="text-lg font-black text-white flex items-center"><i data-lucide="briefcase" class="w-5 h-5 mr-2 text-role-staff"></i>Office</h2></div>
-                <nav class="flex-1 py-4 flex flex-col gap-1 px-4">
-                    <p class="px-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 mt-2">Staff Menu</p>
-                    <button class="sidebar-menu-btn sidebar-menu-active bg-gray-800 text-white flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'dashboard', this)">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-role-staff"></i>대시보드
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'content', this)">
-                        <i data-lucide="video" class="w-4 h-4 mr-3"></i>콘텐츠 관리
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'product', this)">
-                        <i data-lucide="package" class="w-4 h-4 mr-3"></i>상품 관리
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'cs', this)">
-                        <i data-lucide="headphones" class="w-4 h-4 mr-3"></i>CS 관리
-                    </button>
+        <section id="view-office" class="hide flex-grow flex dashboard-layout view-section bg-gray-50">
+            <aside class="w-64 bg-gray-900 text-gray-300 flex-col hidden md:flex shrink-0">
+                <div class="p-6 pb-4 border-b border-gray-800"><h2 class="text-lg font-black text-white flex items-center"><i data-lucide="briefcase" class="w-5 h-5 mr-2 text-orange-500"></i>OFFICE CENTER</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto">
+                    <button class="sidebar-menu-btn sidebar-office-active flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'dashboard', this)">대시보드</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'content', this)">콘텐츠 관리</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'product', this)">상품 관리</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'order', this)">주문 관리</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'cs', this)">CS 관리 (1:1문의)</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'review', this)">리뷰 관리</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'notice', this)">공지/FAQ</button>
+                    <button class="sidebar-menu-btn hover:bg-gray-800 hover:text-white flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('office', 'noti', this)">알림</button>
                 </nav>
             </aside>
-            <div class="flex-1 p-6 md:p-10 bg-gray-50 overflow-y-auto">
-                <div id="office-tab-dashboard" class="office-tab-content block max-w-6xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">Staff 대시보드</h3>
-                    
-                    <!-- Pending Actions Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Pending Videos -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                <h4 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="video" class="w-4 h-4 mr-2 text-role-staff"></i>영상 승인 대기</h4>
-                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold" id="office-pending-video-count">0건</span>
-                            </div>
-                            <div class="p-4" id="office-pending-videos">
-                                <div class="text-center py-8 text-gray-400 text-sm">로딩 중...</div>
-                            </div>
+            <div class="flex-1 p-8 overflow-y-auto">
+                <div id="office-tab-dashboard" class="office-tab-content block max-w-6xl mx-auto">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-900">Staff 대시보드</h3>
+                            <p class="text-sm text-gray-500 mt-1">담당 업무 현황을 한눈에 확인하세요.</p>
                         </div>
+                        <span class="text-xs font-bold text-gray-400 bg-white px-3 py-1.5 rounded-lg border border-gray-200">2024-05-01 ~ 2024-05-07</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"><p class="text-gray-500 text-xs font-bold mb-1">총 매출</p><p class="text-xl font-black text-gray-900">₩12,345,000</p><p class="text-[10px] text-green-500 font-bold mt-2">▲ 12.5%</p></div>
+                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"><p class="text-gray-500 text-xs font-bold mb-1">주문 건수</p><p class="text-xl font-black text-gray-900">412</p><p class="text-[10px] text-green-500 font-bold mt-2">▲ 8.3%</p></div>
+                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"><p class="text-gray-500 text-xs font-bold mb-1">상품 수</p><p class="text-xl font-black text-gray-900">256</p><p class="text-[10px] text-green-500 font-bold mt-2">▲ 15.2%</p></div>
+                        <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm"><p class="text-gray-500 text-xs font-bold mb-1">상담 대기</p><p class="text-xl font-black text-orange-600">12</p><p class="text-[10px] text-gray-400 font-bold mt-2">처리 필요</p></div>
+                    </div>
 
-                        <!-- Pending Products -->
-                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                                <h4 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="package" class="w-4 h-4 mr-2 text-role-staff"></i>상품 등록 요청</h4>
-                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold" id="office-pending-product-count">0건</span>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h4 class="font-bold text-gray-800 text-sm">최근 주문</h4>
                             </div>
-                            <div class="p-4" id="office-pending-products">
-                                <div class="text-center py-8 text-gray-400 text-sm">로딩 중...</div>
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-white text-gray-400 border-b border-gray-100"><tr><th class="px-5 py-2 font-medium">주문번호</th><th class="px-2 py-2 font-medium">상품명</th><th class="px-5 py-2 font-medium text-right">상태</th></tr></thead>
+                                <tbody class="divide-y divide-gray-50 text-gray-700">
+                                    <tr><td class="px-5 py-3 text-gray-500">20240507-001</td><td class="px-2 py-3 font-medium">K-굿즈 세트</td><td class="px-5 py-3 text-right"><span class="text-blue-500 font-bold">배송중</span></td></tr>
+                                    <tr><td class="px-5 py-3 text-gray-500">20240507-002</td><td class="px-2 py-3 font-medium">한국 전통 팔찌</td><td class="px-5 py-3 text-right"><span class="text-gray-400 font-bold">배송완료</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h4 class="font-bold text-gray-800 text-sm">승인 대기 현황 (영상/상품)</h4>
+                            </div>
+                            <div class="p-5" id="office-pending-list">
+                                <!-- JS Injected -->
+                                <div class="text-center py-4 text-gray-400 text-xs">로딩 중...</div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!-- Other office placeholders -->
-                <div id="office-tab-content" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">콘텐츠(영상/태그) 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
-                <div id="office-tab-product" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">상품(목록/승인) 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
-                <div id="office-tab-cs" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">1:1 문의 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
+                <div id="office-tab-content" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">콘텐츠 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">영상 및 태그 목록 구현 예정</div></div>
+                <div id="office-tab-product" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">상품 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">상품 등록 승인 및 목록 구현 예정</div></div>
+                <div id="office-tab-order" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">주문 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">주문 목록 및 배송 처리 기능 구현 예정</div></div>
+                <div id="office-tab-cs" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">CS 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">1:1 문의 답변 폼 구현 예정</div></div>
+                <div id="office-tab-review" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">리뷰 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">리뷰 숨김/노출 처리 구현 예정</div></div>
+                <div id="office-tab-notice" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">공지/FAQ</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">공지사항 작성 폼 구현 예정</div></div>
+                <div id="office-tab-noti" class="office-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">알림 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">푸시/이메일 알림 발송 구현 예정</div></div>
             </div>
         </section>
 
         <!-- ==================== 4. 최고 관리자 (Admin) ==================== -->
-        <section id="view-admin" class="hide flex-grow flex dashboard-layout view-section">
-            <aside class="w-64 bg-indigo-950 text-indigo-100 flex-col hidden lg:flex shrink-0">
-                <div class="p-6 pb-2 border-b border-indigo-900/50"><h2 class="text-lg font-black text-white flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-2 text-role-admin"></i>Admin Center</h2></div>
-                <nav class="flex-1 py-4 flex flex-col gap-1 px-4 overflow-y-auto">
-                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-2">통합 관리</p>
-                    <button class="sidebar-menu-btn sidebar-menu-active bg-indigo-900/50 text-white flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'dashboard', this)">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-role-admin"></i>대시보드
-                    </button>
-                    
-                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-4">사용자 관리</p>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'users', this)">
-                        <i data-lucide="users" class="w-4 h-4 mr-3"></i>회원 관리
-                    </button>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'staff', this)">
-                        <i data-lucide="contact" class="w-4 h-4 mr-3"></i>직원 권한 관리
-                    </button>
-                    
-                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-4">시스템</p>
-                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'settings', this)">
-                        <i data-lucide="settings" class="w-4 h-4 mr-3"></i>시스템 설정
-                    </button>
+        <section id="view-admin" class="hide flex-grow flex dashboard-layout view-section bg-[#f4f5f7]">
+            <aside class="w-64 bg-white border-r border-gray-200 flex-col hidden lg:flex shrink-0">
+                <div class="p-6 pb-4 border-b border-gray-100"><h2 class="text-lg font-black text-indigo-900 flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-2 text-indigo-600"></i>ADMIN CENTER</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-3 overflow-y-auto">
+                    <button class="sidebar-menu-btn sidebar-admin-active flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'dashboard', this)">대시보드</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'content', this)">콘텐츠 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'product', this)">상품 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'order', this)">주문 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'finance', this)">정산/통계</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'users', this)">회원 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'staff', this)">직원/권한 관리</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'notice', this)">공지/FAQ</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'settings', this)">시스템 설정</button>
+                    <button class="sidebar-menu-btn text-gray-600 hover:bg-gray-50 flex items-center px-4 py-2.5 rounded-lg text-sm transition-colors w-full text-left font-medium" onclick="app.ui.switchTab('admin', 'log', this)">감사 로그</button>
                 </nav>
             </aside>
-            <div class="flex-1 p-6 lg:p-10 bg-gray-50 overflow-y-auto">
+            <div class="flex-1 p-8 lg:p-10 overflow-y-auto">
                 <!-- 4.1. 어드민 대시보드 -->
-                <div id="admin-tab-dashboard" class="admin-tab-content block max-w-6xl">
-                    <h3 class="text-2xl font-black text-gray-900 mb-6">통합 대시보드</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="admin-summary-cards">
-                        <!-- JS Rendered -->
+                <div id="admin-tab-dashboard" class="admin-tab-content block max-w-7xl mx-auto">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-900">통합 대시보드</h3>
+                        </div>
+                        <select class="bg-white border border-gray-200 text-gray-700 text-xs rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2">
+                            <option>최근 7일 (2024-05-01 ~ 05-07)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8" id="admin-summary-cards">
+                        <!-- JS Rendered or Mocked -->
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                            <p class="text-gray-500 text-sm font-bold">총 매출</p>
-                            <p class="text-3xl font-black text-gray-900 mt-2">₩12,345,000</p>
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="text-gray-500 text-sm font-bold">총 매출</p>
+                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">▲ 12.5%</span>
+                            </div>
+                            <p class="text-3xl font-black text-gray-900">₩12,345,000</p>
                         </div>
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                            <p class="text-gray-500 text-sm font-bold">주문 건수</p>
-                            <p class="text-3xl font-black text-gray-900 mt-2">412건</p>
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="text-gray-500 text-sm font-bold">주문 건수</p>
+                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">▲ 8.3%</span>
+                            </div>
+                            <p class="text-3xl font-black text-gray-900">412<span class="text-base text-gray-400 font-medium ml-1">건</span></p>
                         </div>
                         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                            <p class="text-gray-500 text-sm font-bold">신규 회원 (7일)</p>
-                            <p class="text-3xl font-black text-gray-900 mt-2">256명</p>
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="text-gray-500 text-sm font-bold">신규 회원</p>
+                                <span class="bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded">▲ 15.2%</span>
+                            </div>
+                            <p class="text-3xl font-black text-gray-900">256<span class="text-base text-gray-400 font-medium ml-1">명</span></p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <div class="flex justify-between items-start mb-2">
+                                <p class="text-gray-500 text-sm font-bold">환불 금액</p>
+                                <span class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded">▼ 3.1%</span>
+                            </div>
+                            <p class="text-3xl font-black text-gray-900">₩242,000</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                            <h4 class="font-bold text-gray-800 text-sm mb-6">매출 추이</h4>
+                            <div class="h-48 w-full border-b border-l border-gray-200 relative">
+                                <!-- Mock Line Chart -->
+                                <svg class="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <polyline fill="none" stroke="#6366f1" stroke-width="2" points="0,80 20,60 40,70 60,30 80,40 100,10"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col items-center">
+                            <h4 class="font-bold text-gray-800 text-sm mb-6 w-full text-left">주문 현황</h4>
+                            <div class="donut-mockup mb-4"><div class="donut-inner"></div></div>
+                            <ul class="text-xs text-gray-600 space-y-2 w-full px-4">
+                                <li class="flex justify-between items-center"><span class="flex items-center"><span class="w-2 h-2 rounded-full bg-brand mr-2"></span>배송중</span><span class="font-bold">42%</span></li>
+                                <li class="flex justify-between items-center"><span class="flex items-center"><span class="w-2 h-2 rounded-full bg-gray-300 mr-2"></span>배송완료</span><span class="font-bold">58%</span></li>
+                            </ul>
                         </div>
                     </div>
                 </div>
 
-                <!-- 4.2. 직원 관리 탭 (핵심 와이어프레임 구현) -->
-                <div id="admin-tab-staff" class="admin-tab-content hide max-w-6xl">
-                    <div class="flex justify-between items-end mb-6">
+                <!-- 4.2. 직원 관리 탭 (권한 부여 핵심 UI) -->
+                <div id="admin-tab-staff" class="admin-tab-content hide max-w-6xl mx-auto">
+                    <div class="flex justify-between items-end mb-8 border-b border-gray-200 pb-4">
                         <div>
-                            <h3 class="text-2xl font-black text-gray-900">직원 관리</h3>
-                            <p class="text-gray-500 text-sm mt-1">일반 회원을 직원으로 임명하고 권한을 관리합니다.</p>
+                            <h3 class="text-2xl font-black text-gray-900">직원 / 권한 관리</h3>
+                            <p class="text-gray-500 text-sm mt-1">일반 회원을 직원으로 임명하고 업무 역할을 부여합니다.</p>
                         </div>
                     </div>
                     
                     <!-- 직원 추가 검색 폼 -->
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">신규 직원 검색 (이름 또는 이메일)</label>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+                        <label class="block text-sm font-bold text-gray-700 mb-3">신규 직원 추가 (회원 검색)</label>
                         <div class="flex gap-3">
-                            <input type="text" id="admin-staff-search" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand/20 outline-none" placeholder="회원 검색...">
-                            <button onclick="app.views.admin.searchUser()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">검색</button>
+                            <input type="text" id="admin-staff-search" class="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all" placeholder="회원 이름 또는 이메일 검색...">
+                            <button onclick="app.views.admin.searchUser()" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:bg-indigo-700 transition-colors shadow-sm">검색</button>
                         </div>
-                        <div id="admin-search-results" class="mt-4 hide border border-gray-200 rounded-xl divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                        <div id="admin-search-results" class="mt-4 hide border border-gray-100 rounded-lg divide-y divide-gray-50 max-h-48 overflow-y-auto bg-gray-50/50">
                             <!-- JS Rendered -->
                         </div>
                     </div>
 
                     <!-- 등록된 직원 목록 -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                        <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
-                            <h4 class="font-bold text-gray-800">등록된 직원 목록</h4>
-                            <button onclick="app.views.admin.loadStaff()" class="text-xs text-gray-500 hover:text-brand flex items-center"><i data-lucide="refresh-cw" class="w-3 h-3 mr-1"></i>새로고침</button>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-50/80 border-b border-gray-200 flex justify-between items-center">
+                            <h4 class="font-bold text-gray-800 text-sm">등록된 직원 목록</h4>
+                            <button onclick="app.views.admin.loadStaff()" class="text-xs text-gray-500 hover:text-indigo-600 flex items-center bg-white px-2 py-1 rounded border border-gray-200 shadow-sm"><i data-lucide="refresh-cw" class="w-3 h-3 mr-1"></i>새로고침</button>
                         </div>
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs border-b border-gray-200">
+                            <thead class="bg-white text-gray-500 font-bold uppercase text-xs border-b border-gray-100">
                                 <tr>
-                                    <th class="px-6 py-3">직원명 (이메일)</th>
-                                    <th class="px-4 py-3">직급/역할</th>
-                                    <th class="px-4 py-3">가입일</th>
-                                    <th class="px-6 py-3 text-right">관리</th>
+                                    <th class="px-6 py-4">직원 정보 (이름/이메일)</th>
+                                    <th class="px-4 py-4">역할 등급</th>
+                                    <th class="px-4 py-4">담당 업무 (직급)</th>
+                                    <th class="px-6 py-4 text-right">권한 관리</th>
                                 </tr>
                             </thead>
-                            <tbody id="admin-staff-table" class="divide-y divide-gray-100">
+                            <tbody id="admin-staff-table" class="divide-y divide-gray-50 bg-white">
                                 <!-- JS Rendered -->
                                 <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">로딩 중...</td></tr>
                             </tbody>
@@ -438,32 +618,39 @@
                     </div>
                 </div>
                 
-                <div id="admin-tab-users" class="admin-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">회원 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">기능 구현 예정</div></div>
-                <div id="admin-tab-settings" class="admin-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">시스템 설정</h3><div class="bg-white p-8 rounded-xl border border-gray-200">기능 구현 예정</div></div>
+                <!-- Other Admin Placeholders -->
+                <div id="admin-tab-content" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">콘텐츠 관리 (전체)</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">전체 콘텐츠 마스터 제어 구현 예정</div></div>
+                <div id="admin-tab-product" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">상품 관리 (전체)</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">전체 상품 카탈로그 마스터 제어 구현 예정</div></div>
+                <div id="admin-tab-order" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">주문 관리 (취소/환불)</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">취소/환불 최종 승인 및 마스터 제어 구현 예정</div></div>
+                <div id="admin-tab-finance" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">정산 / 통계</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">매출 및 비용 정산 차트 구현 예정</div></div>
+                <div id="admin-tab-users" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">회원 관리 (전체)</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">회원 목록 및 상태(활성/정지) 관리 구현 예정</div></div>
+                <div id="admin-tab-notice" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">공지/FAQ 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">사이트 전역 공지 설정 구현 예정</div></div>
+                <div id="admin-tab-settings" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">시스템 설정</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">결제 모듈 설정, 알림 설정 등 구현 예정</div></div>
+                <div id="admin-tab-log" class="admin-tab-content hide max-w-6xl mx-auto"><h3 class="text-2xl font-black mb-6 border-b pb-4">감사 로그 (Audit Log)</h3><div class="bg-white p-8 rounded-xl border border-gray-200 text-gray-400 text-center">직원 및 시스템 활동 로그 기록 구현 예정</div></div>
             </div>
         </section>
     </main>
 
     <!-- Slide-over Cart Panel -->
-    <div id="cart-panel" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] flex flex-col border-l border-gray-200">
+    <div id="cart-panel" class="fixed inset-y-0 right-0 w-full md:w-[400px] bg-white shadow-[0_0_40px_rgba(0,0,0,0.1)] transform translate-x-full transition-transform duration-300 ease-in-out z-[60] flex flex-col">
         <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
-            <h2 class="text-xl font-black text-gray-900 flex items-center"><i data-lucide="shopping-cart" class="mr-3 w-5 h-5 text-brand"></i>장바구니</h2>
-            <button onclick="app.ui.toggleCart()" class="text-gray-400 hover:text-gray-900 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <h2 class="text-xl font-black text-gray-900 flex items-center"><i data-lucide="shopping-bag" class="mr-3 w-5 h-5 text-gray-800"></i>장바구니</h2>
+            <button onclick="app.ui.toggleCart()" class="text-gray-400 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="flex-grow p-6 overflow-y-auto bg-gray-50/50" id="cart-items-container">
             <!-- Items injected by JS -->
         </div>
-        <div class="border-t border-gray-200 p-6 bg-white">
-            <div class="flex justify-between items-center mb-4">
-                <span class="font-bold text-gray-500 text-sm">총 결제 금액</span>
-                <span id="cart-total-price" class="text-2xl font-black text-gray-900">0원</span>
+        <div class="border-t border-gray-100 p-6 bg-white shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+            <div class="flex justify-between items-center mb-6">
+                <span class="font-bold text-gray-500">총 결제 금액</span>
+                <span id="cart-total-price" class="text-2xl font-black text-brand">0원</span>
             </div>
-            <button onclick="app.ui.showToast('결제 모듈 연동 준비 중', 'info')" class="w-full bg-brand hover:bg-brand-hover text-white py-3.5 rounded-xl font-bold shadow-md transition-all text-sm">
-                결제 진행하기
+            <button onclick="app.ui.showToast('결제 모듈 연동 준비 중', 'info')" class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold shadow-md transition-all text-sm">
+                주문하기
             </button>
         </div>
     </div>
-    <div id="cart-overlay" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[55] hide transition-opacity opacity-0" onclick="app.ui.toggleCart()"></div>
+    <div id="cart-overlay" class="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-[55] hide transition-opacity opacity-0" onclick="app.ui.toggleCart()"></div>
 
     <!-- Application Javascript -->
     <script>
@@ -489,8 +676,8 @@
                         if (!res.ok) throw new Error(data.error || 'API Error');
                         return data;
                     } catch (err) {
-                        console.warn(`API Failed (${endpoint}):`, err.message);
-                        throw err;
+                        console.warn(`API 통신 실패 (${endpoint}):`, err.message);
+                        throw err; // UI에서 catch하여 Mock Data 표출 목적으로 Throw
                     }
                 },
                 async get(endpoint) { return this.request(endpoint); },
@@ -514,17 +701,11 @@
                         app.ui.updateAuthUI();
                         app.ui.switchView('view-home');
                     } catch (err) {
-                        app.ui.showToast('로그인에 실패했습니다. (Mock 모드 전환)', 'error');
-                        this.fallbackMockLogin(response);
+                        // 요구사항: 오직 Google OAuth 로그인만 허용. 테스트 로그인 불가.
+                        // 서버 오류 시 사용자에게 명확히 알림. Mock 로그인 처리 제거.
+                        app.ui.showToast('로그인 처리 중 서버 오류가 발생했습니다.', 'error');
+                        console.error("Login failed (Server error or misconfiguration).", err);
                     }
-                },
-                fallbackMockLogin(response) {
-                    // 백엔드 연결 실패시 프론트엔드 전용 Mock 작동
-                    const user = { id: 'u_mock', name: '테스트 유저', email: 'test@ohseyokr.com', role: 'ADMIN', profile: 'https://ui-avatars.com/api/?name=Test&background=random' };
-                    app.state.token = 'mock_token_123';
-                    app.state.user = user;
-                    app.ui.updateAuthUI();
-                    app.ui.showToast('백엔드 미연결: 최고관리자(Admin) 권한으로 임시 로그인됨', 'info');
                 },
                 logout() {
                     app.state.user = null;
@@ -534,7 +715,7 @@
                     app.ui.updateAuthUI();
                     app.ui.switchView('view-home');
                     app.ui.showToast('로그아웃 되었습니다.');
-                    // 구글 위젯 재렌더링 필요
+                    // 구글 위젯 재렌더링
                     setTimeout(() => app.initGoogleAuth(), 100);
                 }
             },
@@ -562,23 +743,17 @@
                     
                     // Reset buttons
                     viewElement.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
-                        btn.classList.remove('sidebar-menu-active', 'bg-gray-800', 'bg-indigo-900/50', 'text-white');
-                        if(viewName === 'mypage') {
-                            btn.classList.add('text-gray-600', 'hover:bg-gray-50');
-                            if(btn.querySelector('i')) btn.querySelector('i').classList.remove('text-brand');
-                        }
+                        btn.classList.remove(`sidebar-${viewName}-active`);
+                        if(viewName === 'mypage') btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+                        if(viewName === 'office') btn.classList.add('hover:bg-gray-800', 'hover:text-white');
+                        if(viewName === 'admin') btn.classList.add('text-gray-600', 'hover:bg-gray-50');
                     });
                     
                     // Set active button styles based on view
-                    if(viewName === 'mypage') {
-                        btnElement.classList.add('sidebar-menu-active');
-                        btnElement.classList.remove('text-gray-600', 'hover:bg-gray-50');
-                        if(btnElement.querySelector('i')) btnElement.querySelector('i').classList.add('text-brand');
-                    } else if(viewName === 'office') {
-                        btnElement.classList.add('sidebar-menu-active', 'bg-gray-800', 'text-white');
-                    } else if(viewName === 'admin') {
-                        btnElement.classList.add('sidebar-menu-active', 'bg-indigo-900/50', 'text-white');
-                    }
+                    btnElement.classList.add(`sidebar-${viewName}-active`);
+                    if(viewName === 'mypage') btnElement.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                    if(viewName === 'office') btnElement.classList.remove('hover:bg-gray-800', 'hover:text-white');
+                    if(viewName === 'admin') btnElement.classList.remove('text-gray-600', 'hover:bg-gray-50');
 
                     // Toggle content
                     viewElement.querySelectorAll(`.${viewName}-tab-content`).forEach(tab => tab.classList.add('hide'));
@@ -596,24 +771,17 @@
                         userArea.classList.remove('hide');
                         
                         document.getElementById('user-name').textContent = app.state.user.name;
+                        document.getElementById('user-email-display').textContent = app.state.user.email;
                         document.getElementById('user-avatar').src = app.state.user.profile || `https://ui-avatars.com/api/?name=${app.state.user.name}&background=f3f4f6&color=3b82f6`;
-                        
-                        const badge = document.getElementById('user-role-badge');
-                        badge.textContent = app.state.user.role;
-                        badge.className = 'text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm mt-0.5 w-max ';
                         
                         navOffice.classList.add('hide');
                         navAdmin.classList.add('hide');
 
                         if (app.state.user.role === 'ADMIN') {
-                            badge.classList.add('bg-role-admin');
                             navAdmin.classList.remove('hide');
-                            navOffice.classList.remove('hide');
+                            navOffice.classList.remove('hide'); // Admin은 Office도 접근 가능
                         } else if (app.state.user.role === 'STAFF') {
-                            badge.classList.add('bg-role-staff');
                             navOffice.classList.remove('hide');
-                        } else {
-                            badge.classList.add('bg-role-member');
                         }
                     } else {
                         authArea.classList.remove('hide');
@@ -628,13 +796,13 @@
                     
                     msgEl.textContent = message;
                     if(type === 'error') {
-                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-red-500/20 text-red-400';
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-red-500/10 text-red-500';
                         iconContainer.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
                     } else if(type === 'success') {
-                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 text-green-400';
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-green-500/10 text-green-500';
                         iconContainer.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>';
                     } else {
-                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400';
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500';
                         iconContainer.innerHTML = '<i data-lucide="info" class="w-4 h-4"></i>';
                     }
                     lucide.createIcons();
@@ -671,6 +839,7 @@
             },
 
             // --- Specific View Logics ---
+            // 프론트엔드 시연을 위해 백엔드 통신 실패 시 UI에 그릴 Mock 데이터를 Fallback으로 제공합니다.
             views: {
                 home: {
                     async init() {
@@ -678,19 +847,20 @@
                             const data = await app.api.get('/public/data');
                             this.render(data);
                         } catch(e) {
-                            // Mock Fallback
+                            // UI Rendering Fallback (백엔드 미구동 시)
                             this.render({
                                 videos: [
-                                    { title: '[대기중] TOPIK II 쓰기 만점 전략', id: '1' },
-                                    { title: 'TOPIK II 듣기 실전 모의고사 1회', id: '2' },
-                                    { title: '초급자도 귀가 뚫리는 한국어 문법', id: '3' },
-                                    { title: 'TOPIK 어휘 300제 벼락치기 풀이', id: '4' }
+                                    { title: 'TOPIK II 쓰기 만점 전략 - 54번 완벽 해부', id: '1', level: '고급', tag: '쓰기' },
+                                    { title: 'TOPIK II 듣기 실전 모의고사 1회 완벽 풀이', id: '2', level: '고급', tag: '듣기' },
+                                    { title: '초급자도 귀가 뚫리는 한국어 문법 100선 총정리', id: '3', level: '초중급', tag: '문법' },
+                                    { title: 'TOPIK 어휘 300제 벼락치기 기출 풀이', id: '4', level: '모든레벨', tag: '어휘' }
                                 ],
                                 products: [
-                                    { name: '한국 정통 홍삼 진액 에디션', price: 68000, id: 101 },
-                                    { name: '한국 전통 간식 4종 세트', price: 19000, id: 102 },
-                                    { name: 'TOPIK II 실전 기출 문제집', price: 17000, id: 103 },
-                                    { name: 'K-뷰티 스킨케어 입문 세트', price: 34000, id: 104 }
+                                    { name: '한국 정통 홍삼 진액 에디션 세트', price: 68000, id: 101, imgText: 'Ginseng' },
+                                    { name: '한국 전통 간식 4종 세트', price: 19000, id: 102, imgText: 'K-Food' },
+                                    { name: 'TOPIK II 실전 기출 문제집 (해설서 포함)', price: 17000, id: 103, imgText: 'Book' },
+                                    { name: 'K-뷰티 스킨케어 입문 세트', price: 34000, id: 104, imgText: 'K-Beauty' },
+                                    { name: 'K-팝 아이돌 굿즈 패키지', price: 45000, id: 105, imgText: 'K-Pop' }
                                 ]
                             });
                         }
@@ -699,13 +869,15 @@
                         const vGrid = document.getElementById('home-video-grid');
                         vGrid.innerHTML = data.videos.map(v => `
                             <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover cursor-pointer group flex flex-col">
-                                <div class="aspect-video bg-gray-50 flex items-center justify-center border-b border-gray-100 relative">
-                                    <span class="font-black text-xl text-brand/30">TOPIK Video</span>
-                                    <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"><i data-lucide="play-circle" class="w-10 h-10 text-white"></i></div>
+                                <div class="aspect-[4/3] bg-[#eef2ff] flex items-center justify-center relative border-b border-indigo-50/50">
+                                    <span class="font-black text-2xl text-brand tracking-tight opacity-70">${v.tag || 'Video'}</span>
+                                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all backdrop-blur-[1px]"><i data-lucide="play-circle" class="w-12 h-12 text-white shadow-sm rounded-full"></i></div>
                                 </div>
-                                <div class="p-5 flex-grow">
-                                    <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold mb-2 inline-block">고급</span>
-                                    <h3 class="font-bold text-gray-900 text-sm leading-snug line-clamp-2">${v.title}</h3>
+                                <div class="p-5 flex-grow flex flex-col">
+                                    <div class="flex items-center mb-3">
+                                        <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold border border-gray-200">${v.level || '일반'}</span>
+                                    </div>
+                                    <h3 class="font-bold text-gray-900 text-[15px] leading-snug line-clamp-2">${v.title}</h3>
                                 </div>
                             </div>
                         `).join('');
@@ -713,15 +885,15 @@
                         const pGrid = document.getElementById('home-product-grid');
                         pGrid.innerHTML = data.products.map(p => `
                             <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover group flex flex-col">
-                                <div class="aspect-square bg-gray-50 flex items-center justify-center border-b border-gray-100 relative">
-                                     <span class="font-black text-xl text-gray-300">K-Goods</span>
+                                <div class="aspect-square bg-[#f8fafc] flex items-center justify-center relative border-b border-gray-50">
+                                     <span class="font-black text-xl text-gray-300 tracking-tight">${p.imgText || 'K-Goods'}</span>
                                 </div>
-                                <div class="p-4 flex flex-col flex-grow">
-                                    <h3 class="font-bold text-gray-800 text-xs mb-2 line-clamp-2 flex-grow">${p.name}</h3>
-                                    <div class="flex justify-between items-end mt-1">
-                                        <span class="font-black text-gray-900 tracking-tight">₩${p.price.toLocaleString()}</span>
-                                        <button onclick="app.views.cart.add(${p.id}, '${p.name}', ${p.price})" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-brand hover:text-white transition-colors">
-                                            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                                <div class="p-5 flex flex-col flex-grow">
+                                    <h3 class="font-bold text-gray-800 text-sm mb-3 line-clamp-2 flex-grow">${p.name}</h3>
+                                    <div class="flex justify-between items-center mt-auto">
+                                        <span class="font-black text-gray-900 tracking-tight text-base">₩${p.price.toLocaleString()}</span>
+                                        <button onclick="app.views.cart.add(${p.id}, '${p.name}', ${p.price})" class="w-8 h-8 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand hover:text-white hover:border-brand transition-colors focus:outline-none focus:ring-2 focus:ring-brand/50">
+                                            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -732,10 +904,16 @@
                 },
                 mypage: {
                     init() {
-                        document.getElementById('mypage-welcome-name').textContent = app.state.user.name;
+                        if(!app.state.user) return;
+                        document.getElementById('mypage-dash-name').textContent = app.state.user.name;
+                        document.getElementById('mypage-dash-avatar').src = app.state.user.profile || `https://ui-avatars.com/api/?name=${app.state.user.name}&background=f3f4f6`;
+                        
                         document.getElementById('mypage-profile-name').textContent = app.state.user.name;
                         document.getElementById('mypage-profile-email').textContent = app.state.user.email;
                         document.getElementById('mypage-profile-img').src = app.state.user.profile || `https://ui-avatars.com/api/?name=${app.state.user.name}&background=f3f4f6`;
+                        
+                        document.getElementById('mypage-input-name').value = app.state.user.name;
+                        document.getElementById('mypage-input-email').value = app.state.user.email;
                     }
                 },
                 office: {
@@ -744,33 +922,32 @@
                             const data = await app.api.get('/office/dashboard');
                             this.renderDashboard(data);
                         } catch(e) {
-                            // Mock Fallback
+                            // UI Rendering Fallback
                             this.renderDashboard({
-                                pendingVideos: [{ id: 1, title: 'TOPIK 듣기 실전', created_at: '2024-05-07' }],
-                                pendingProducts: [{ id: 101, name: '한국 전통 부채', price: 15000 }]
+                                pendingVideos: [{ id: 1, title: 'TOPIK 듣기 실전 2회', status: '대기' }],
+                                pendingProducts: [{ id: 101, name: '한국 전통 부채 세트', status: '요청' }]
                             });
                         }
                     },
                     renderDashboard(data) {
-                        document.getElementById('office-pending-video-count').textContent = `${data.pendingVideos.length}건`;
-                        document.getElementById('office-pending-product-count').textContent = `${data.pendingProducts.length}건`;
+                        const list = document.getElementById('office-pending-list');
+                        let html = '';
                         
-                        document.getElementById('office-pending-videos').innerHTML = data.pendingVideos.map(v => `
-                            <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-lg mb-2 shadow-sm">
-                                <div><p class="text-sm font-bold text-gray-800">${v.title}</p></div>
-                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-brand/10 text-brand px-3 py-1.5 rounded-md font-bold hover:bg-brand hover:text-white transition-colors">승인</button>
-                            </div>
-                        `).join('') || '<p class="text-center text-gray-400 text-sm py-4">대기 내역 없음</p>';
+                        data.pendingVideos.forEach(v => {
+                            html += `<div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <div><span class="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded font-bold mr-2">영상</span><span class="text-sm font-bold text-gray-800">${v.title}</span></div>
+                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1.5 rounded-md font-bold hover:bg-orange-500 hover:text-white transition-colors">검토/승인</button>
+                            </div>`;
+                        });
+                        
+                        data.pendingProducts.forEach(p => {
+                            html += `<div class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg mb-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
+                                <div><span class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-bold mr-2">상품</span><span class="text-sm font-bold text-gray-800">${p.name}</span></div>
+                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-orange-50 text-orange-600 border border-orange-200 px-3 py-1.5 rounded-md font-bold hover:bg-orange-500 hover:text-white transition-colors">검토/승인</button>
+                            </div>`;
+                        });
 
-                        document.getElementById('office-pending-products').innerHTML = data.pendingProducts.map(p => `
-                            <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-lg mb-2 shadow-sm">
-                                <div>
-                                    <p class="text-sm font-bold text-gray-800">${p.name}</p>
-                                    <p class="text-xs text-gray-500">₩${p.price.toLocaleString()}</p>
-                                </div>
-                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-brand/10 text-brand px-3 py-1.5 rounded-md font-bold hover:bg-brand hover:text-white transition-colors">승인</button>
-                            </div>
-                        `).join('') || '<p class="text-center text-gray-400 text-sm py-4">대기 내역 없음</p>';
+                        list.innerHTML = html || '<p class="text-center text-gray-400 text-sm py-4">대기 내역이 없습니다.</p>';
                     }
                 },
                 admin: {
@@ -784,10 +961,10 @@
                             const data = await app.api.get('/admin/staff');
                             this.renderStaffList(data.staff);
                         } catch(e) {
-                            // Mock Fallback
+                            // UI Rendering Fallback
                             this.renderStaffList([
-                                { id: 'u1', name: '김어드민', email: 'admin@ohseyokr.com', role: 'ADMIN', staff_position: '최고 관리자', created_at: '2024-01-01' },
-                                { id: 'u2', name: '이직원', email: 'staff1@ohseyokr.com', role: 'STAFF', staff_position: '콘텐츠 관리자', created_at: '2024-02-15' }
+                                { id: 'u1', name: '김어드민', email: 'admin@ohseyokr.com', role: 'ADMIN', staff_position: '최고 관리자' },
+                                { id: 'u2', name: '이직원', email: 'staff1@ohseyokr.com', role: 'STAFF', staff_position: '콘텐츠 관리자' }
                             ]);
                         }
                     },
@@ -799,23 +976,26 @@
                         }
                         
                         tbody.innerHTML = staffArray.map(user => `
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-6 py-3">
+                            <tr class="hover:bg-gray-50/50 transition-colors group">
+                                <td class="px-6 py-4">
                                     <div class="font-bold text-gray-900 text-sm">${user.name}</div>
-                                    <div class="text-gray-500 text-xs">${user.email}</div>
+                                    <div class="text-gray-500 text-[11px] mt-0.5">${user.email}</div>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-4">
                                     ${user.role === 'ADMIN' 
-                                        ? `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold"><i data-lucide="shield" class="w-3 h-3 mr-1"></i>ADMIN</span>`
-                                        : `<span class="inline-flex items-center bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold"><i data-lucide="briefcase" class="w-3 h-3 mr-1"></i>STAFF</span>`
+                                        ? `<span class="inline-flex items-center bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-md text-xs font-bold border border-indigo-100"><i data-lucide="shield" class="w-3 h-3 mr-1.5"></i>ADMIN</span>`
+                                        : `<span class="inline-flex items-center bg-orange-50 text-orange-700 px-2.5 py-1 rounded-md text-xs font-bold border border-orange-100"><i data-lucide="briefcase" class="w-3 h-3 mr-1.5"></i>STAFF</span>`
                                     }
-                                    <span class="text-xs text-gray-600 ml-2 font-medium">${user.staff_position || ''}</span>
                                 </td>
-                                <td class="px-4 py-3 text-xs text-gray-500">${new Date(user.created_at).toLocaleDateString()}</td>
-                                <td class="px-6 py-3 text-right">
+                                <td class="px-4 py-4">
+                                    <select class="bg-white border border-gray-200 text-gray-700 text-xs rounded focus:ring-indigo-500 focus:border-indigo-500 block p-1.5 font-medium" disabled>
+                                        <option selected>${user.staff_position || '미지정'}</option>
+                                    </select>
+                                </td>
+                                <td class="px-6 py-4 text-right">
                                     ${user.role !== 'ADMIN' 
-                                        ? `<button onclick="app.views.admin.removeStaff('${user.id}')" class="text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition-all">권한 해제</button>` 
-                                        : '<span class="text-xs text-gray-400">해제 불가</span>'}
+                                        ? `<button onclick="app.views.admin.removeStaff('${user.id}')" class="text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-100 hover:border-red-500 transition-all">권한 해제</button>` 
+                                        : '<span class="text-[11px] text-gray-400 font-medium px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100">최고 관리자 (해제 불가)</span>'}
                                 </td>
                             </tr>
                         `).join('');
@@ -833,9 +1013,9 @@
                             const data = await app.api.get(`/admin/users/search?q=${encodeURIComponent(q)}`);
                             this.renderSearchResults(data.users);
                         } catch(e) {
-                            // Mock Fallback
+                            // UI Rendering Fallback
                             this.renderSearchResults([
-                                { id: 'm1', name: q + ' (검색됨)', email: 'search@test.com', role: 'MEMBER' }
+                                { id: 'm1', name: q + ' (회원)', email: 'search@test.com', role: 'MEMBER' }
                             ]);
                         }
                     },
@@ -846,33 +1026,44 @@
                             return;
                         }
                         resultDiv.innerHTML = users.map(u => `
-                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                            <div class="p-4 flex items-center justify-between hover:bg-white transition-colors">
                                 <div>
-                                    <p class="font-bold text-sm text-gray-900">${u.name} <span class="text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded ml-1">${u.email}</span></p>
+                                    <p class="font-bold text-sm text-gray-900">${u.name} <span class="text-[11px] font-medium text-gray-500 bg-white border border-gray-200 px-1.5 py-0.5 rounded ml-2">${u.email}</span></p>
                                 </div>
-                                <button onclick="app.views.admin.addStaff('${u.id}')" class="text-xs bg-brand/10 text-brand hover:bg-brand hover:text-white px-3 py-1.5 rounded font-bold transition-colors">직원 임명</button>
+                                <div class="flex items-center space-x-2">
+                                    <select id="position-select-${u.id}" class="bg-white border border-gray-200 text-gray-700 text-xs rounded focus:ring-indigo-500 focus:border-indigo-500 block p-1.5 font-medium outline-none">
+                                        <option value="콘텐츠 관리자">콘텐츠 관리자</option>
+                                        <option value="주문/CS 관리자">주문/CS 관리자</option>
+                                    </select>
+                                    <button onclick="app.views.admin.addStaff('${u.id}')" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-600 hover:text-white hover:border-indigo-600 px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm">직원 임명</button>
+                                </div>
                             </div>
                         `).join('');
                     },
                     async addStaff(userId) {
+                        const positionSelect = document.getElementById(`position-select-${userId}`);
+                        const position = positionSelect ? positionSelect.value : 'STAFF';
+                        
                         try {
-                            await app.api.post('/admin/staff/add', { userId, position: 'STAFF' });
+                            await app.api.post('/admin/staff/add', { userId, position });
                             app.ui.showToast('직원으로 임명되었습니다.', 'success');
                             document.getElementById('admin-search-results').classList.add('hide');
                             this.loadStaff();
                         } catch(e) {
-                            app.ui.showToast('MOCK: 직원이 추가되었습니다.', 'success');
+                            // UI Feedback Fallback
+                            app.ui.showToast('MOCK: 직원이 임명되었습니다.', 'success');
                             document.getElementById('admin-search-results').classList.add('hide');
                         }
                     },
                     async removeStaff(userId) {
-                        if(!confirm('정말 직원 권한을 해제하시겠습니까?')) return;
+                        if(!confirm('정말 직원 권한을 해제하시겠습니까? (일반 회원으로 변경됩니다)')) return;
                         try {
                             await app.api.post('/admin/staff/remove', { userId });
                             app.ui.showToast('직원 권한이 해제되었습니다.', 'success');
                             this.loadStaff();
                         } catch(e) {
-                            app.ui.showToast('MOCK: 권한이 해제되었습니다.', 'success');
+                            // UI Feedback Fallback
+                            app.ui.showToast('MOCK: 직원 권한이 해제되었습니다.', 'success');
                         }
                     }
                 },
@@ -883,15 +1074,20 @@
                         else app.state.cart.push({ id, name, price, quantity: 1 });
                         
                         app.ui.updateCartBadge();
-                        app.ui.showToast('장바구니에 추가되었습니다.', 'success');
+                        app.ui.showToast('장바구니에 담겼습니다.', 'success');
                     },
                     render() {
                         const container = document.getElementById('cart-items-container');
                         const totalEl = document.getElementById('cart-total-price');
                         
                         if (app.state.cart.length === 0) {
-                            container.innerHTML = '<div class="text-center text-gray-400 mt-10 text-sm">장바구니가 비어있습니다.</div>';
+                            container.innerHTML = `
+                                <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-20">
+                                    <i data-lucide="shopping-cart" class="w-12 h-12 mb-4 text-gray-200"></i>
+                                    <p class="text-sm font-medium">장바구니가 비어있습니다.</p>
+                                </div>`;
                             totalEl.textContent = '0원';
+                            lucide.createIcons();
                             return;
                         }
 
@@ -899,14 +1095,16 @@
                         container.innerHTML = app.state.cart.map((item, index) => {
                             total += item.price * item.quantity;
                             return `
-                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-3 flex justify-between items-center">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm mb-1 line-clamp-1">${item.name}</h4>
+                            <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] mb-3 flex flex-col relative group">
+                                <button onclick="app.state.cart.splice(${index}, 1); app.ui.updateCartBadge(); app.views.cart.render();" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 transition-colors bg-white rounded-full p-1"><i data-lucide="x" class="w-3.5 h-3.5"></i></button>
+                                <h4 class="font-bold text-gray-900 text-sm mb-1 pr-6 line-clamp-1">${item.name}</h4>
+                                <div class="flex justify-between items-end mt-2">
                                     <p class="text-brand font-black tracking-tight text-sm">₩${item.price.toLocaleString()}</p>
-                                </div>
-                                <div class="flex items-center space-x-3 ml-4 shrink-0">
-                                    <span class="text-xs font-medium bg-gray-50 px-2 py-1 rounded border border-gray-100">수량: ${item.quantity}</span>
-                                    <button onclick="app.state.cart.splice(${index}, 1); app.ui.updateCartBadge(); app.views.cart.render();" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    <div class="flex items-center border border-gray-200 rounded-md bg-gray-50">
+                                        <button class="px-2 py-0.5 text-gray-500 hover:text-gray-900 text-xs">-</button>
+                                        <span class="px-2 py-0.5 text-xs font-bold bg-white border-x border-gray-200">${item.quantity}</span>
+                                        <button class="px-2 py-0.5 text-gray-500 hover:text-gray-900 text-xs">+</button>
+                                    </div>
                                 </div>
                             </div>`;
                         }).join('');
@@ -932,7 +1130,6 @@
                 const wrapper = document.getElementById('google-login-btn-wrapper');
                 wrapper.innerHTML = ''; // Clear existing
                 
-                // Expose global callback for Google library
                 window.handleGoogleCredential = (res) => this.auth.handleGoogleResponse(res);
 
                 if (window.google && window.google.accounts) {
@@ -942,10 +1139,10 @@
                     });
                     google.accounts.id.renderButton(
                         wrapper,
-                        { theme: "outline", size: "large", type: "standard" }
+                        { theme: "outline", size: "large", type: "standard", shape: "pill" }
                     );
                 } else {
-                    wrapper.innerHTML = '<span class="text-xs text-red-500">구글 로그인 로드 실패</span>';
+                    wrapper.innerHTML = '<span class="text-xs font-bold text-red-500 border border-red-200 bg-red-50 px-3 py-1.5 rounded-lg">구글 로그인 로드 실패</span>';
                 }
             },
 
