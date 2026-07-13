@@ -37,18 +37,11 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         
-        /* MyPage & Admin Custom Styles */
+        /* MyPage Custom Styles */
         .mypage-nav-btn { transition: all 0.2s ease; }
         .mypage-nav-btn.active {
-            background-color: #f0fdf4;
-            color: #2f8f4e;
-            font-weight: 900;
-        }
-        
-        .admin-nav-btn { transition: all 0.2s ease; }
-        .admin-nav-btn.active {
-            background-color: #f3e8ff; /* purple-50 */
-            color: #8a3fd1; /* text-role-admin */
+            background-color: #f0fdf4; /* Tailwind green-50 */
+            color: #2f8f4e; /* text-role-member */
             font-weight: 900;
         }
         
@@ -60,17 +53,6 @@
                 #e07a2c 66% 100%
             );
         }
-        .admin-chart-donut {
-            background: conic-gradient(
-                #8b5cf6 0% 60%, 
-                #c4b5fd 60% 85%, 
-                #e2e8f0 85% 100%
-            );
-        }
-        
-        /* Inner Tab Styles for Admin */
-        .admin-inner-tab { border-bottom: 2px solid transparent; color: #64748b; padding-bottom: 0.5rem; transition: all 0.2s ease; font-weight: bold; font-size: 0.875rem; }
-        .admin-inner-tab.active { border-color: #8a3fd1; color: #8a3fd1; }
     </style>
 </head>
 <body class="antialiased min-h-screen flex flex-col relative selection:bg-indigo-100 selection:text-indigo-900">
@@ -231,8 +213,9 @@
             </div>
         </div>
 
-        <!-- ==================== 3. MY PAGE (MEMBER ONLY) ==================== -->
+        <!-- ==================== 3. MY PAGE (MEMBER ONLY) - REBUILT BY WIREFRAME ==================== -->
         <div id="view-mypage" class="view-section hide max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8 items-start">
+            
             <!-- Left Sidebar Navigation -->
             <aside class="w-full md:w-56 flex-shrink-0 bg-white md:bg-transparent rounded-xl md:rounded-none p-4 md:p-0 border md:border-none shadow-sm md:shadow-none">
                 <h2 class="text-2xl font-black text-slate-900 mb-6 hidden md:block px-2">마이페이지</h2>
@@ -248,7 +231,7 @@
                 </nav>
             </aside>
 
-            <!-- Main Content Container (Keep existing MyPage logic intact) -->
+            <!-- Main Content Container -->
             <div class="flex-grow min-w-0 w-full" id="mypage-content-area">
                 
                 <!-- [1] Dashboard View -->
@@ -325,30 +308,285 @@
                 <!-- [2] Learning View -->
                 <div id="mypage-view-learning" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">학습 현황</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">진행 중인 학습 내역이 표시됩니다.</div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-white border rounded-xl p-5 text-center shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-2">총 시청 시간</div><div class="text-xl font-black text-slate-900">12h 30m</div>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5 text-center shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-2">완료한 강의</div><div class="text-xl font-black text-slate-900">24개</div>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5 text-center shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-2">학습 연속일</div><div class="text-xl font-black text-slate-900">7일</div>
+                        </div>
+                        <div class="bg-white border rounded-xl p-5 text-center shadow-sm">
+                            <div class="text-xs font-bold text-slate-500 mb-2">최근 레벨</div><div class="text-xl font-black text-role-member">Intermediate</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress & Chart -->
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white border rounded-xl p-6 shadow-sm">
+                            <h4 class="font-bold text-slate-900 mb-6">레벨별 진도율</h4>
+                            <div class="space-y-5">
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Beginner</span><span>100%</span></div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-role-guest h-2 rounded-full" style="width: 100%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Intermediate</span><span class="text-role-member">42%</span></div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-role-member h-2 rounded-full" style="width: 42%"></div></div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-bold text-slate-700 mb-1"><span>Advanced</span><span>0%</span></div>
+                                    <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-slate-300 h-2 rounded-full" style="width: 0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white border rounded-xl p-6 shadow-sm flex items-center justify-between">
+                            <div class="flex-grow">
+                                <h4 class="font-bold text-slate-900 mb-4">학습 통계</h4>
+                                <ul class="space-y-2 text-xs font-bold text-slate-600">
+                                    <li class="flex items-center"><span class="w-3 h-3 rounded bg-role-guest mr-2"></span>어휘량 <span class="ml-auto text-slate-900">42%</span></li>
+                                    <li class="flex items-center"><span class="w-3 h-3 rounded bg-role-member mr-2"></span>문법 <span class="ml-auto text-slate-900">24%</span></li>
+                                    <li class="flex items-center"><span class="w-3 h-3 rounded bg-role-staff mr-2"></span>듣기/읽기 <span class="ml-auto text-slate-900">34%</span></li>
+                                </ul>
+                            </div>
+                            <!-- CSS Donut Chart -->
+                            <div class="ml-8 w-32 h-32 rounded-full chart-donut flex items-center justify-center shadow-inner">
+                                <div class="w-20 h-20 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Videos List -->
+                    <div class="bg-white border rounded-xl p-6 shadow-sm">
+                        <h4 class="font-bold text-slate-900 mb-4">최근 수강한 강의</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-slate-50 transition cursor-pointer">
+                                <div class="w-16 h-12 bg-slate-200 rounded flex items-center justify-center mr-4 relative overflow-hidden group">
+                                    <i data-lucide="play" class="w-5 h-5 text-slate-500 absolute z-10"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-sm text-slate-800">TOPIK II 쓰기 기출 풀이 01</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">진도 70% | 마지막 시청: 2024-05-06</div>
+                                </div>
+                                <button class="px-3 py-1 border text-xs font-bold rounded hover:bg-slate-100">이어보기</button>
+                            </div>
+                            <div class="flex items-center p-3 border rounded-lg hover:bg-slate-50 transition cursor-pointer">
+                                <div class="w-16 h-12 bg-slate-200 rounded flex items-center justify-center mr-4 relative overflow-hidden">
+                                    <i data-lucide="play" class="w-5 h-5 text-slate-500 absolute z-10"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-sm text-slate-800">중급 문법 총정리</div>
+                                    <div class="text-[10px] text-slate-500 mt-1">진도 45% | 마지막 시청: 2024-05-05</div>
+                                </div>
+                                <button class="px-3 py-1 border text-xs font-bold rounded hover:bg-slate-100">이어보기</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- [3] Orders View -->
                 <div id="mypage-view-orders" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">주문내역</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">상세 주문내역이 표시됩니다.</div>
+                    
+                    <div class="flex space-x-2 text-sm font-bold text-slate-500 border-b pb-4">
+                        <button class="px-3 py-1 rounded bg-slate-800 text-white">전체</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">결제완료</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">배송중</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">배송완료</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">취소/환불</button>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-slate-50 p-4 rounded-lg border">
+                        <div class="flex items-center space-x-2 text-sm">
+                            <span class="font-bold text-slate-700">조회일자</span>
+                            <select class="border rounded px-2 py-1 outline-none focus:ring-1"><option>전체 기간</option></select>
+                        </div>
+                        <div class="flex items-center relative w-64">
+                            <input type="text" placeholder="주문번호, 상품명으로 검색" class="w-full border rounded px-3 py-1.5 text-sm outline-none focus:ring-1 pr-16">
+                            <button class="absolute right-0 bg-slate-800 text-white text-xs px-3 py-1.5 rounded-r font-bold h-full">검색</button>
+                        </div>
+                    </div>
+
+                    <!-- Order Cards Dummy List -->
+                    <div class="space-y-4">
+                        <!-- Card 1 -->
+                        <div class="bg-white border rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between text-xs font-bold text-slate-500 border-b pb-3 mb-4">
+                                <span>2024-05-07-0001 <span class="mx-2">|</span> 2024-05-07 14:32</span>
+                                <a href="#" class="text-slate-800 hover:underline">상세보기 ></a>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-20 h-20 bg-slate-100 rounded-lg mr-4 p-2 flex items-center justify-center"><i data-lucide="package" class="text-slate-400"></i></div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-slate-900 text-sm mb-1">K-뷰티 스킨케어 4종 세트</div>
+                                    <div class="text-xs text-slate-500">수량 1개 · ₩54,000</div>
+                                </div>
+                                <div class="flex flex-col items-center space-y-2 ml-4">
+                                    <span class="text-sm font-black text-role-member">배송중</span>
+                                    <button class="px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-700 hover:bg-slate-50 bg-white shadow-sm">배송조회</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="bg-white border rounded-xl p-5 shadow-sm">
+                            <div class="flex justify-between text-xs font-bold text-slate-500 border-b pb-3 mb-4">
+                                <span>2024-05-02-0010 <span class="mx-2">|</span> 2024-05-02 09:10</span>
+                                <a href="#" class="text-slate-800 hover:underline">상세보기 ></a>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-20 h-20 bg-slate-100 rounded-lg mr-4 p-2 flex items-center justify-center"><i data-lucide="book" class="text-slate-400"></i></div>
+                                <div class="flex-grow">
+                                    <div class="font-bold text-slate-900 text-sm mb-1">한국 라면 간식 4종 세트</div>
+                                    <div class="text-xs text-slate-500">수량 1개 · ₩29,000</div>
+                                </div>
+                                <div class="flex flex-col items-center space-y-2 ml-4">
+                                    <span class="text-sm font-black text-slate-600">배송완료</span>
+                                    <div class="flex space-x-1">
+                                        <button class="px-3 py-1.5 border border-role-member text-role-member rounded text-xs font-bold hover:bg-green-50 bg-white">구매확정</button>
+                                        <button class="px-3 py-1.5 border border-slate-300 rounded text-xs font-bold text-slate-700 hover:bg-slate-50 bg-white">교환/환불 신청</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pagination Dummy -->
+                    <div class="flex justify-center items-center space-x-1 pt-4 text-sm font-bold text-slate-500">
+                        <button class="w-8 h-8 rounded flex items-center justify-center hover:bg-slate-100"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                        <button class="w-8 h-8 rounded bg-slate-800 text-white flex items-center justify-center">1</button>
+                        <button class="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center">2</button>
+                        <button class="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center">3</button>
+                        <button class="w-8 h-8 rounded flex items-center justify-center hover:bg-slate-100"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    </div>
                 </div>
 
                 <!-- [4] Points View -->
                 <div id="mypage-view-points" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">포인트</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">포인트 적립/사용 내역이 표시됩니다.</div>
+                    
+                    <div class="bg-green-50 border border-green-100 rounded-xl p-8 flex justify-between items-center shadow-sm">
+                        <div>
+                            <div class="text-sm font-bold text-slate-600 mb-1">보유 포인트</div>
+                            <div class="text-4xl font-black text-slate-900">12,500<span class="text-2xl ml-1 text-role-member">P</span></div>
+                        </div>
+                        <div class="text-right text-xs text-slate-600 space-y-1 bg-white p-4 rounded-lg border border-green-200 shadow-sm">
+                            <div class="flex justify-between w-40"><span class="font-bold">적립예정 포인트</span><span class="font-black">1,200P</span></div>
+                            <div class="flex justify-between w-40"><span class="font-bold">소멸예정 포인트</span><span class="font-black text-rose-500">500P</span></div>
+                            <button class="mt-2 w-full py-1.5 border rounded font-bold hover:bg-slate-50">포인트 사용 안내</button>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2 text-sm font-bold text-slate-500 border-b pb-4 mt-8">
+                        <button class="px-3 py-1 rounded bg-slate-800 text-white">전체</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">적립</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">사용</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">소멸</button>
+                    </div>
+
+                    <div class="bg-white border rounded-xl overflow-hidden shadow-sm text-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b text-xs font-bold text-slate-500">
+                                <tr>
+                                    <th class="p-4 w-24">날짜</th>
+                                    <th class="p-4 w-20">구분</th>
+                                    <th class="p-4">내용</th>
+                                    <th class="p-4 text-right w-24">포인트</th>
+                                    <th class="p-4 text-right w-24">잔액</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y text-slate-800 font-medium">
+                                <tr>
+                                    <td class="p-4 text-xs font-mono text-slate-500">2024-05-07</td>
+                                    <td class="p-4 text-xs text-role-member font-bold">적립</td>
+                                    <td class="p-4 text-xs">상품 구매 적립 (2024-05-07-0001)</td>
+                                    <td class="p-4 text-right font-black text-role-member">+540P</td>
+                                    <td class="p-4 text-right font-bold text-slate-500">12,500P</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-xs font-mono text-slate-500">2024-05-05</td>
+                                    <td class="p-4 text-xs text-rose-500 font-bold">사용</td>
+                                    <td class="p-4 text-xs">주문 결제 사용 (2024-05-05-0012)</td>
+                                    <td class="p-4 text-right font-black text-rose-500">-1,000P</td>
+                                    <td class="p-4 text-right font-bold text-slate-500">11,960P</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 text-xs font-mono text-slate-500">2024-04-29</td>
+                                    <td class="p-4 text-xs text-role-member font-bold">적립</td>
+                                    <td class="p-4 text-xs">리뷰 작성 적립</td>
+                                    <td class="p-4 text-right font-black text-role-member">+200P</td>
+                                    <td class="p-4 text-right font-bold text-slate-500">12,960P</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- [5] Coupons View -->
                 <div id="mypage-view-coupons" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">쿠폰함</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">보유 쿠폰 내역이 표시됩니다.</div>
+                    
+                    <div class="flex space-x-6 text-sm font-bold border-b pb-4">
+                        <button class="pb-4 border-b-2 border-slate-900 text-slate-900 -mb-[18px]">보유 쿠폰 (3)</button>
+                        <button class="pb-4 text-slate-400 hover:text-slate-600 -mb-[18px]">사용완료 (5)</button>
+                        <button class="pb-4 text-slate-400 hover:text-slate-600 -mb-[18px]">기간만료 (2)</button>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <!-- Coupon Card 1 -->
+                        <div class="bg-white border rounded-xl p-5 flex items-center justify-between shadow-sm border-l-4 border-l-role-member">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mr-4"><i data-lucide="ticket" class="text-role-member"></i></div>
+                                <div>
+                                    <div class="font-black text-slate-900 mb-1">10% 할인 쿠폰</div>
+                                    <ul class="text-[10px] text-slate-500 font-medium">
+                                        <li>최대 10,000원 할인</li>
+                                        <li>사용조건: 30,000원 이상 구매 시</li>
+                                        <li>유효기간: 2024.06.30 까지</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="flex flex-col items-center text-xs font-bold text-role-member hover:bg-green-50 p-2 rounded transition">
+                                <i data-lucide="download" class="w-5 h-5 mb-1"></i> 사용하기
+                            </button>
+                        </div>
+
+                        <!-- Coupon Card 2 -->
+                        <div class="bg-white border rounded-xl p-5 flex items-center justify-between shadow-sm border-l-4 border-l-slate-800">
+                            <div class="flex items-center">
+                                <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mr-4"><i data-lucide="ticket" class="text-slate-700"></i></div>
+                                <div>
+                                    <div class="font-black text-slate-900 mb-1">5,000원 할인 쿠폰</div>
+                                    <ul class="text-[10px] text-slate-500 font-medium">
+                                        <li>사용조건: 20,000원 이상 구매 시</li>
+                                        <li>유효기간: 2024.06.15 까지</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <button class="flex flex-col items-center text-xs font-bold text-slate-700 hover:bg-slate-50 p-2 rounded transition">
+                                <i data-lucide="download" class="w-5 h-5 mb-1"></i> 사용하기
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 bg-slate-50 p-6 rounded-xl border flex items-center justify-between">
+                        <div class="text-sm font-bold text-slate-700">새로운 쿠폰이 있으신가요?</div>
+                        <div class="flex w-64">
+                            <input type="text" placeholder="쿠폰 번호 입력" class="w-full border rounded-l px-3 py-2 text-sm outline-none focus:ring-1">
+                            <button class="bg-slate-800 text-white text-xs px-4 rounded-r font-bold shrink-0">쿠폰 등록하기</button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- [6] Profile View -->
                 <div id="mypage-view-profile" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">개인정보</h2>
+                    
                     <div class="bg-white border rounded-xl shadow-sm overflow-hidden text-sm">
                         <div class="p-4 bg-slate-50 border-b font-bold text-slate-800">기본 정보</div>
                         <div class="p-6 space-y-4">
@@ -359,21 +597,138 @@
                             <div class="flex items-center">
                                 <div class="w-32 font-bold text-slate-500">이메일</div>
                                 <div class="font-medium text-slate-900 flex-grow" id="profile-email">user@example.com</div>
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">이메일 변경</button>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 font-bold text-slate-500">연락처</div>
+                                <div class="font-medium text-slate-900 flex-grow">010-1234-5678</div>
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">수정</button>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-32 font-bold text-slate-500">생년월일</div>
+                                <div class="font-medium text-slate-900 flex-grow">1990-01-01</div>
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">수정</button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="bg-white border rounded-xl shadow-sm overflow-hidden text-sm">
+                        <div class="p-4 bg-slate-50 border-b font-bold text-slate-800">계정 정보</div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-32 font-bold text-slate-500">로그인 방식</div>
+                                <div class="font-medium text-slate-900 flex items-center space-x-2">
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-[10px] font-bold">Google 계정 연동됨</span>
+                                </div>
+                                <div class="ml-auto flex space-x-2">
+                                    <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">연동 해제</button>
+                                    <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">비밀번호 변경</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center border-t pt-4">
+                                <div class="w-32 font-bold text-slate-500">회원등급</div>
+                                <div class="font-black text-slate-900 flex-grow">SILVER</div>
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">등급혜택 보기</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-right">
+                        <button class="bg-role-member text-white px-6 py-2 rounded-lg font-bold shadow hover:bg-green-700 transition text-sm">정보 수정 저장</button>
                     </div>
                 </div>
 
                 <!-- [7] Addresses View -->
                 <div id="mypage-view-addresses" class="mypage-view-content space-y-6 hide">
-                    <h2 class="text-xl font-black text-slate-900 border-b pb-4">배송지 관리</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">등록된 배송지가 표시됩니다.</div>
+                    <div class="flex justify-between items-center border-b pb-4">
+                        <h2 class="text-xl font-black text-slate-900">배송지 관리</h2>
+                        <button class="text-xs font-bold text-slate-600 border px-3 py-1.5 rounded hover:bg-slate-50">+ 새 배송지 추가</button>
+                    </div>
+                    
+                    <div class="space-y-4 text-sm">
+                        <!-- Address Card 1 -->
+                        <div class="bg-white border-2 border-role-member rounded-xl p-5 shadow-sm relative">
+                            <div class="absolute top-4 right-4 flex space-x-2">
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">수정</button>
+                                <button class="px-3 py-1 border rounded text-xs font-bold text-rose-500 hover:bg-rose-50">삭제</button>
+                            </div>
+                            <span class="inline-block px-2 py-0.5 bg-role-member text-white text-[10px] font-bold rounded mb-2">기본 배송지</span>
+                            <div class="font-black text-slate-900 mb-1">홍길동</div>
+                            <div class="text-slate-500 font-mono text-xs mb-2">010-1234-5678</div>
+                            <div class="text-slate-800 font-medium">
+                                (08123) 서울특별시 강남구 테헤란로 123, 101동 1004호
+                            </div>
+                        </div>
+
+                        <!-- Address Card 2 -->
+                        <div class="bg-white border rounded-xl p-5 shadow-sm relative hover:border-slate-300 transition">
+                            <div class="absolute top-4 right-4 flex space-x-2">
+                                <button class="px-3 py-1 border rounded text-xs font-bold hover:bg-slate-50">수정</button>
+                                <button class="px-3 py-1 border rounded text-xs font-bold text-rose-500 hover:bg-rose-50">삭제</button>
+                            </div>
+                            <span class="inline-block px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-bold rounded mb-2">회사 주소</span>
+                            <div class="font-black text-slate-900 mb-1">홍길동</div>
+                            <div class="text-slate-500 font-mono text-xs mb-2">010-1234-5678</div>
+                            <div class="text-slate-800 font-medium">
+                                (13529) 경기도 성남시 분당구 판교로 242, A동 12층
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-4">* 기본 배송지는 주문 시 자동으로 선택됩니다.</p>
                 </div>
 
                 <!-- [8] Inquiries View -->
                 <div id="mypage-view-inquiries" class="mypage-view-content space-y-6 hide">
                     <h2 class="text-xl font-black text-slate-900 border-b pb-4">문의내역</h2>
-                    <div class="bg-white border rounded-xl p-6 shadow-sm text-center text-slate-500 text-sm py-10">문의내역이 표시됩니다.</div>
+                    
+                    <div class="flex space-x-2 text-sm font-bold text-slate-500 mb-4">
+                        <button class="px-3 py-1 rounded bg-slate-800 text-white">전체</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">답변완료</button>
+                        <button class="px-3 py-1 rounded hover:bg-slate-100">진행중</button>
+                    </div>
+
+                    <div class="bg-white border rounded-xl overflow-hidden shadow-sm text-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b text-xs font-bold text-slate-500">
+                                <tr>
+                                    <th class="p-4 w-24">문의번호</th>
+                                    <th class="p-4">제목</th>
+                                    <th class="p-4 w-28">문의일</th>
+                                    <th class="p-4 w-24 text-center">상태</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y text-slate-800 font-medium cursor-pointer">
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="p-4 text-xs font-mono text-slate-500">Q2024-0005</td>
+                                    <td class="p-4 text-sm font-bold">주문 취소/환불 문의</td>
+                                    <td class="p-4 text-xs text-slate-500">2024-05-07</td>
+                                    <td class="p-4 text-center text-xs font-bold text-role-member">답변완료</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="p-4 text-xs font-mono text-slate-500">Q2024-0004</td>
+                                    <td class="p-4 text-sm font-bold">배송 지연 문의</td>
+                                    <td class="p-4 text-xs text-slate-500">2024-05-03</td>
+                                    <td class="p-4 text-center text-xs font-bold text-role-member">답변완료</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 transition">
+                                    <td class="p-4 text-xs font-mono text-slate-500">Q2024-0003</td>
+                                    <td class="p-4 text-sm font-bold">상품 교환 방법 문의</td>
+                                    <td class="p-4 text-xs text-slate-500">2024-04-29</td>
+                                    <td class="p-4 text-center text-xs font-bold text-slate-500">진행중</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-4">
+                        <div class="flex items-center space-x-1 text-sm font-bold text-slate-500">
+                            <button class="w-8 h-8 rounded flex items-center justify-center hover:bg-slate-100"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                            <button class="w-8 h-8 rounded bg-slate-800 text-white flex items-center justify-center">1</button>
+                            <button class="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center">2</button>
+                            <button class="w-8 h-8 rounded flex items-center justify-center hover:bg-slate-100"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                        </div>
+                        <button class="bg-slate-900 text-white px-5 py-2 rounded shadow font-bold text-sm hover:bg-black transition">1:1 문의하기</button>
+                    </div>
                 </div>
 
             </div>
@@ -381,21 +736,14 @@
 
         <!-- ==================== OFFICE (STAFF / ADMIN) ==================== -->
         <div id="view-office" class="view-section hide w-full h-[calc(100vh-70px)] bg-slate-50 flex overflow-hidden">
-            <!-- Sidebar -->
-            <div class="w-56 bg-white border-r flex flex-col z-10 shadow-sm">
-                <div class="p-4 border-b bg-slate-50 flex justify-between items-center">
-                    <span id="office-role-label" class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center">OFFICE</span>
-                    <button onclick="app.navigate('home')" class="text-[10px] text-slate-400 hover:text-slate-800 underline">나가기</button>
+            <div class="w-56 bg-white border-r flex flex-col">
+                <div class="p-4 border-b">
+                    <span class="bg-slate-900 text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center" id="office-role-label">OFFICE</span>
                 </div>
-                <nav class="flex-1 overflow-y-auto p-3 text-sm font-semibold text-slate-600 space-y-1" id="office-sidebar-nav">
-                    <!-- Rendered by JS -->
-                </nav>
+                <nav class="flex-1 overflow-y-auto p-3 text-sm font-semibold text-slate-600 space-y-1" id="office-sidebar-nav"></nav>
             </div>
 
-            <!-- Content Area -->
-            <div class="flex-1 overflow-y-auto p-8 relative">
-                
-                <!-- STAFF View Container -->
+            <div class="flex-1 overflow-y-auto p-8">
                 <div id="office-staff-panel" class="hide space-y-6 max-w-5xl">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="video" class="w-6 h-6 mr-2 text-role-staff"></i> 영상 콘텐츠 관리</h2>
@@ -405,240 +753,17 @@
                     </div>
                 </div>
 
-                <!-- ADMIN View Container -->
-                <div id="office-admin-panel" class="hide w-full max-w-7xl mx-auto">
-                    
-                    <!-- [1] Dashboard View -->
-                    <div id="admin-view-dashboard" class="admin-view-content space-y-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-role-admin"></i> 대시보드</h2>
-                            </div>
-                            <div class="text-xs font-bold text-slate-500 border rounded-lg px-3 py-1.5 bg-white shadow-sm">2024-05-01 ~ 2024-05-07 <i data-lucide="calendar" class="w-3 h-3 inline ml-1"></i></div>
+                <div id="office-admin-panel" class="hide space-y-6 max-w-6xl">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-role-admin"></i> 종합 대시보드</h2>
+                            <p class="text-xs text-slate-500 mt-1">실시간 통계 요약</p>
                         </div>
-                        
-                        <!-- KPI Cards -->
-                        <div class="grid grid-cols-4 gap-4" id="admin-kpi-cards">
-                            <!-- Rendered by loadDashboardData() -->
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">총 매출</div><div class="text-2xl font-black text-slate-900">₩0</div></div>
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">주문 건수</div><div class="text-2xl font-black text-slate-900">0건</div></div>
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">신규 회원</div><div class="text-2xl font-black text-role-admin">0명</div></div>
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">대기 항목</div><div class="text-2xl font-black text-rose-500">0건</div></div>
-                        </div>
-
-                        <!-- Dummy Charts based on Wireframe -->
-                        <div class="grid grid-cols-3 gap-6">
-                            <div class="col-span-2 bg-white border rounded-xl p-6 shadow-sm">
-                                <h3 class="font-bold text-slate-800 mb-4 text-sm">매출 추이</h3>
-                                <div class="h-48 w-full bg-slate-50 rounded flex items-end justify-between p-4 border-b border-l">
-                                    <div class="w-1/6 h-[30%] bg-purple-200 rounded-t"></div>
-                                    <div class="w-1/6 h-[45%] bg-purple-300 rounded-t"></div>
-                                    <div class="w-1/6 h-[40%] bg-purple-400 rounded-t"></div>
-                                    <div class="w-1/6 h-[65%] bg-purple-500 rounded-t"></div>
-                                    <div class="w-1/6 h-[80%] bg-purple-600 rounded-t"></div>
-                                </div>
-                                <div class="flex justify-between text-[10px] text-slate-400 mt-2 font-mono px-4">
-                                    <span>05-01</span><span>05-02</span><span>05-03</span><span>05-04</span><span>05-05</span>
-                                </div>
-                            </div>
-                            <div class="bg-white border rounded-xl p-6 shadow-sm flex flex-col items-center">
-                                <h3 class="font-bold text-slate-800 mb-4 text-sm w-full text-left">주문 현황</h3>
-                                <div class="w-32 h-32 rounded-full admin-chart-donut flex items-center justify-center shadow-inner mt-4">
-                                    <div class="w-20 h-20 bg-white rounded-full"></div>
-                                </div>
-                                <div class="mt-6 space-y-2 w-full text-xs font-bold text-slate-600">
-                                    <div class="flex items-center"><span class="w-3 h-3 rounded bg-purple-500 mr-2"></span>배송중 <span class="ml-auto">60%</span></div>
-                                    <div class="flex items-center"><span class="w-3 h-3 rounded bg-purple-300 mr-2"></span>배송완료 <span class="ml-auto">25%</span></div>
-                                    <div class="flex items-center"><span class="w-3 h-3 rounded bg-slate-200 mr-2"></span>기타 <span class="ml-auto">15%</span></div>
-                                </div>
-                            </div>
-                        </div>
+                        <button onclick="app.batchApprove()" class="bg-role-admin text-white px-4 py-2 rounded-lg text-xs font-bold shadow-md hover:bg-purple-700 transition flex items-center">
+                            <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> 임시항목 전체 승인
+                        </button>
                     </div>
-
-                    <!-- [2] Content Management View -->
-                    <div id="admin-view-content" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="youtube" class="w-6 h-6 mr-2 text-role-admin"></i> 콘텐츠 관리</h2>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">영상 관리</button>
-                            <button class="admin-inner-tab">태그 관리/승인</button>
-                            <button class="admin-inner-tab">상품 매칭 승인</button>
-                        </div>
-                        <div class="bg-white border rounded-xl p-6 shadow-sm">
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="flex space-x-2">
-                                    <select class="border rounded px-3 py-1.5 text-sm outline-none"><option>전체</option></select>
-                                    <select class="border rounded px-3 py-1.5 text-sm outline-none"><option>전체 상태</option></select>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <input type="text" placeholder="영상 제목 검색" class="border rounded px-3 py-1.5 text-sm outline-none">
-                                    <button class="bg-role-admin text-white px-4 py-1.5 rounded font-bold text-sm">검색</button>
-                                    <button onclick="app.batchApprove()" class="bg-slate-900 text-white px-4 py-1.5 rounded font-bold text-sm shadow">임시 일괄 승인</button>
-                                </div>
-                            </div>
-                            <div class="text-center py-12 text-sm text-slate-500 bg-slate-50 rounded border border-dashed">대시보드에서 불러온 영상 데이터가 표시됩니다.</div>
-                        </div>
-                    </div>
-
-                    <!-- [3] Product Management View -->
-                    <div id="admin-view-product" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="package" class="w-6 h-6 mr-2 text-role-admin"></i> 상품 관리</h2>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">상품 승인</button>
-                            <button class="admin-inner-tab">상품 목록</button>
-                        </div>
-                        <div class="bg-white border rounded-xl p-6 shadow-sm">
-                            <div class="text-center py-12 text-sm text-slate-500 bg-slate-50 rounded border border-dashed">상품 목록 및 승인 대기 리스트가 표시됩니다.</div>
-                        </div>
-                    </div>
-
-                    <!-- [4] Order Management View -->
-                    <div id="admin-view-order" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="shopping-bag" class="w-6 h-6 mr-2 text-role-admin"></i> 주문 관리</h2>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">주문 목록</button>
-                            <button class="admin-inner-tab">취소/환불 관리</button>
-                        </div>
-                        <div class="bg-white border rounded-xl p-6 shadow-sm">
-                            <div class="text-center py-12 text-sm text-slate-500 bg-slate-50 rounded border border-dashed">고객들의 주문 내역이 표시됩니다.</div>
-                        </div>
-                    </div>
-
-                    <!-- [5] Finance View -->
-                    <div id="admin-view-finance" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="dollar-sign" class="w-6 h-6 mr-2 text-role-admin"></i> 정산/통계</h2>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">매출 통계</button>
-                            <button class="admin-inner-tab">정산 관리</button>
-                        </div>
-                        <div class="bg-white border rounded-xl p-6 shadow-sm">
-                            <div class="text-center py-12 text-sm text-slate-500 bg-slate-50 rounded border border-dashed">상세 매출 및 정산 내역 차트가 표시됩니다.</div>
-                        </div>
-                    </div>
-
-                    <!-- [6] User Management View -->
-                    <div id="admin-view-user" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="users" class="w-6 h-6 mr-2 text-role-admin"></i> 회원 관리</h2>
-                        </div>
-                        <div class="bg-white border rounded-xl shadow-sm overflow-hidden text-sm">
-                            <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-                                <div class="flex space-x-2">
-                                    <select class="border rounded px-3 py-1.5 text-xs outline-none font-bold text-slate-600"><option>전체 등급</option></select>
-                                </div>
-                                <div class="flex space-x-2">
-                                    <input type="text" placeholder="이름, 이메일 검색" class="border rounded px-3 py-1 text-xs outline-none w-48">
-                                    <button class="bg-role-admin text-white px-3 py-1 rounded font-bold text-xs">검색</button>
-                                </div>
-                            </div>
-                            <table class="w-full text-left">
-                                <thead class="bg-slate-50 border-b text-xs font-bold text-slate-500">
-                                    <tr>
-                                        <th class="p-3">회원 ID</th>
-                                        <th class="p-3">이름</th>
-                                        <th class="p-3">이메일</th>
-                                        <th class="p-3">권한</th>
-                                        <th class="p-3">가입일</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-user-list-body" class="divide-y text-slate-800 font-medium">
-                                    <!-- Rendered via JS -->
-                                    <tr><td colspan="5" class="p-4 text-center text-slate-400">데이터를 불러오는 중입니다...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- [7] Staff Management View (Crucial Feature) -->
-                    <div id="admin-view-staff" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="briefcase" class="w-6 h-6 mr-2 text-role-admin"></i> 직원 관리</h2>
-                            <button onclick="app.openStaffModal()" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-black transition flex items-center">
-                                <i data-lucide="user-plus" class="w-4 h-4 mr-2"></i> 직원 추가
-                            </button>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">직원 목록</button>
-                            <button class="admin-inner-tab">직원별 업무 설정</button>
-                        </div>
-                        
-                        <div class="bg-white border rounded-xl shadow-sm overflow-hidden text-sm">
-                            <table class="w-full text-left">
-                                <thead class="bg-slate-50 border-b text-xs font-bold text-slate-500">
-                                    <tr>
-                                        <th class="p-4 w-1/4">이름 (이메일)</th>
-                                        <th class="p-4 w-1/4">직급 (Role)</th>
-                                        <th class="p-4 w-1/4">지정일</th>
-                                        <th class="p-4 text-right">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-staff-list-body" class="divide-y text-slate-800 font-medium">
-                                    <!-- Rendered via JS -->
-                                    <tr><td colspan="4" class="p-6 text-center text-slate-400">직원 데이터를 불러오는 중입니다...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- [8] Board (Notice/FAQ) View -->
-                    <div id="admin-view-board" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="clipboard-list" class="w-6 h-6 mr-2 text-role-admin"></i> 공지/FAQ</h2>
-                        </div>
-                        <div class="flex space-x-6 mb-4">
-                            <button class="admin-inner-tab active">공지사항</button>
-                            <button class="admin-inner-tab">FAQ</button>
-                        </div>
-                        <div class="bg-white border rounded-xl p-6 shadow-sm">
-                            <div class="text-center py-12 text-sm text-slate-500 bg-slate-50 rounded border border-dashed">게시판 관리 화면이 표시됩니다.</div>
-                        </div>
-                    </div>
-
-                    <!-- [9] System Setting View -->
-                    <div id="admin-view-system" class="admin-view-content space-y-6 hide">
-                        <div class="flex justify-between items-center border-b pb-4">
-                            <h2 class="text-2xl font-black text-slate-900 flex items-center"><i data-lucide="settings" class="w-6 h-6 mr-2 text-role-admin"></i> 시스템 설정 및 감사로그</h2>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6">
-                            <div class="bg-white border rounded-xl p-6 shadow-sm space-y-4">
-                                <h3 class="font-bold text-slate-900 border-l-4 border-role-admin pl-2">기본 설정</h3>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">사이트 이름</label>
-                                    <input type="text" value="Ohseyokr" class="w-full border rounded px-3 py-2 text-sm outline-none" readonly>
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">대표 이메일</label>
-                                    <input type="text" value="admin@ohseyokr.com" class="w-full border rounded px-3 py-2 text-sm outline-none" readonly>
-                                </div>
-                                <button class="w-full bg-role-admin text-white py-2 rounded font-bold shadow hover:bg-purple-700 mt-2">저장</button>
-                            </div>
-                            <div class="bg-white border rounded-xl p-6 shadow-sm overflow-hidden flex flex-col">
-                                <h3 class="font-bold text-slate-900 border-l-4 border-role-admin pl-2 mb-4">감사 로그 (최근 5건)</h3>
-                                <div class="flex-grow space-y-3 overflow-y-auto">
-                                    <div class="text-xs border-b pb-2">
-                                        <div class="text-[10px] text-slate-400 font-mono mb-0.5">2024-05-07 14:32:10</div>
-                                        <div><span class="font-bold text-slate-700">관리자(admin)</span>님이 상품 <span class="font-bold text-role-admin">[K-뷰티 세트]</span>를 승인 처리함.</div>
-                                    </div>
-                                    <div class="text-xs border-b pb-2">
-                                        <div class="text-[10px] text-slate-400 font-mono mb-0.5">2024-05-06 10:15:00</div>
-                                        <div><span class="font-bold text-slate-700">관리자(admin)</span>님이 회원 <span class="font-bold text-role-admin">[user001]</span>의 권한을 STAFF로 변경함.</div>
-                                    </div>
-                                    <div class="text-xs pb-2">
-                                        <div class="text-[10px] text-slate-400 font-mono mb-0.5">2024-05-05 09:00:22</div>
-                                        <div>시스템 백업 완료.</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <div class="grid grid-cols-4 gap-4" id="admin-kpi-cards"></div>
                 </div>
             </div>
         </div>
@@ -669,48 +794,6 @@
                 <span id="cart-total" class="text-xl text-slate-900 font-extrabold">₩0</span>
             </div>
             <button onclick="app.checkout()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3.5 rounded-xl shadow-md transition text-sm">주문 결제하기</button>
-        </div>
-    </div>
-
-    <!-- Admin: Add Staff Modal -->
-    <div id="staff-add-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center transition-all opacity-0 pointer-events-none hide">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 w-[90%] max-w-md transform scale-95 transition-transform duration-300 relative">
-            <button onclick="app.closeStaffModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-            <h3 class="text-xl font-black mb-4 text-slate-900 border-b pb-3">직원 추가 (권한 변경)</h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">회원 이메일로 검색</label>
-                    <div class="flex space-x-2">
-                        <input type="email" id="staff-search-email" placeholder="user@example.com" class="flex-grow border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-200">
-                        <button onclick="app.searchUserForStaff()" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-black transition">검색</button>
-                    </div>
-                </div>
-
-                <div id="staff-search-result-area" class="bg-slate-50 p-4 rounded-lg border border-slate-200 hide flex flex-col space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-500"><i data-lucide="user" class="w-5 h-5"></i></div>
-                        <div>
-                            <div class="font-bold text-sm text-slate-900" id="search-res-name">홍길동</div>
-                            <div class="text-[10px] text-slate-500 font-mono" id="search-res-email">hong@example.com</div>
-                            <div class="text-[10px] font-bold text-blue-600 mt-0.5" id="search-res-role">현재 권한: MEMBER</div>
-                        </div>
-                    </div>
-                    
-                    <div class="border-t pt-3">
-                        <label class="block text-xs font-bold text-slate-500 mb-2">부여할 직원 등급</label>
-                        <select id="staff-role-select" class="w-full border rounded-lg px-3 py-2 text-sm outline-none font-bold text-slate-700 bg-white">
-                            <option value="STAFF">일반 직원 (STAFF)</option>
-                            <option value="ADMIN">총괄 관리자 (ADMIN)</option>
-                            <option value="MEMBER">일반 회원으로 강등 (MEMBER)</option>
-                        </select>
-                    </div>
-                    
-                    <button onclick="app.grantStaffRole()" class="w-full bg-role-admin text-white py-2.5 rounded-lg font-bold text-sm shadow hover:bg-purple-700 transition mt-2">저장 및 권한 변경</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -767,8 +850,7 @@
                 role: 'GUEST',
                 user: null,
                 cart: [],
-                products: [],
-                tempSearchUserId: null // For Staff Modal
+                products: []
             },
 
             async init() {
@@ -885,6 +967,9 @@
                     this.state.products = pRes.ok ? await pRes.json() : [];
                     this.renderProducts(this.state.products);
                     
+                    if (this.state.role === 'ADMIN' || this.state.role === 'STAFF') {
+                        this.loadDashboardData();
+                    }
                 } catch (e) { console.warn("API Connection failed", e); }
             },
             
@@ -900,9 +985,9 @@
                         const data = await res.json();
                         const html = `
                             <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">총 매출</div><div class="text-2xl font-black text-slate-900">₩${data.todaySales.toLocaleString()}</div></div>
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">총 주문 건수</div><div class="text-2xl font-black text-slate-900">${data.newOrders}건</div></div>
+                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">총 주문</div><div class="text-2xl font-black text-slate-900">${data.newOrders}건</div></div>
                             <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">총 회원</div><div class="text-2xl font-black text-role-admin">${data.newUsers}명</div></div>
-                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">대기 항목(임시)</div><div class="text-2xl font-black text-rose-500">${data.pendingApprovals}건</div></div>
+                            <div class="bg-white p-5 rounded-xl border shadow-sm"><div class="text-xs font-bold text-slate-500 mb-1">대기중 항목</div><div class="text-2xl font-black text-rose-500">${data.pendingApprovals}건</div></div>
                         `;
                         if(document.getElementById('admin-kpi-cards')) document.getElementById('admin-kpi-cards').innerHTML = html;
                     }
@@ -969,14 +1054,14 @@
                 } else if (view === 'mypage') {
                     document.getElementById('main-footer').classList.remove('hide');
                     document.getElementById('view-mypage').classList.remove('hide');
-                    this.navigateMyPage('dashboard'); 
+                    this.navigateMyPage('dashboard'); // Default to dashboard when entering MyPage
                 } else if (view === 'office') {
                     document.getElementById('main-footer').classList.add('hide');
                     document.getElementById('view-office').classList.remove('hide');
                     if (this.state.role === 'ADMIN') {
                         document.getElementById('office-admin-panel').classList.remove('hide');
                         document.getElementById('office-staff-panel').classList.add('hide');
-                        this.navigateAdmin('dashboard'); // Admin 진입 시 대시보드 기본 표시
+                        this.loadDashboardData();
                     } else {
                         document.getElementById('office-admin-panel').classList.add('hide');
                         document.getElementById('office-staff-panel').classList.remove('hide');
@@ -990,227 +1075,25 @@
 
             // --- MyPage Inner Navigation ---
             async navigateMyPage(tab) {
+                // Hide all contents
                 document.querySelectorAll('.mypage-view-content').forEach(el => el.classList.add('hide'));
+                // Reset all nav buttons
                 document.querySelectorAll('.mypage-nav-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
                 
+                // Show target content
                 const targetView = document.getElementById(`mypage-view-${tab}`);
                 if (targetView) targetView.classList.remove('hide');
                 
+                // Activate clicked button
                 const activeBtn = document.querySelector(`.mypage-nav-btn[data-tab="${tab}"]`);
                 if (activeBtn) activeBtn.classList.add('active');
 
+                // Fetch Data for Dashboard specifically
                 if (tab === 'dashboard' && this.state.role !== 'GUEST') {
                     await this.loadMyPageDashboardData();
                 }
-            },
-
-            // --- Admin Inner Navigation (Wireframe Implementation) ---
-            navigateAdmin(tab) {
-                document.querySelectorAll('.admin-view-content').forEach(el => el.classList.add('hide'));
-                document.querySelectorAll('.admin-nav-btn').forEach(btn => {
-                    btn.classList.remove('bg-purple-50', 'text-role-admin', 'active');
-                    btn.classList.add('text-slate-600', 'hover:bg-slate-50');
-                });
-                
-                const targetView = document.getElementById(`admin-view-${tab}`);
-                if (targetView) targetView.classList.remove('hide');
-                
-                const activeBtn = document.querySelector(`.admin-nav-btn[data-tab="${tab}"]`);
-                if (activeBtn) {
-                    activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-50');
-                    activeBtn.classList.add('bg-purple-50', 'text-role-admin', 'active');
-                }
-
-                // Data loading logic per tab
-                if (tab === 'dashboard') {
-                    this.loadDashboardData();
-                } else if (tab === 'user') {
-                    this.loadAdminUsersList();
-                } else if (tab === 'staff') {
-                    this.loadAdminStaffList();
-                }
-                if (['content', 'product', 'order', 'finance', 'board', 'system'].includes(tab)) this.loadAdminOverview(tab);
-            },
-
-            escapeHtml(value) {
-                return String(value ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c]));
-            },
-
-            async loadAdminOverview(tab) {
-                const token = localStorage.getItem('ohseyokr_token');
-                if (!token) return;
-                try {
-                    const res = await fetch('/api/office/admin/overview', { headers: { 'Authorization': `Bearer ${token}` } });
-                    if (!res.ok) return this.showToast('관리자 데이터를 불러오지 못했습니다.', 'error');
-                    const data = await res.json();
-                    const e = this.escapeHtml;
-                    const table = (headers, rows) => `<div class="bg-white border rounded-xl shadow-sm overflow-x-auto"><table class="w-full text-left text-sm"><thead class="bg-slate-50 border-b text-xs text-slate-500"><tr>${headers.map(h => `<th class="p-3">${h}</th>`).join('')}</tr></thead><tbody class="divide-y">${rows || '<tr><td class="p-5 text-slate-400" colspan="8">등록된 데이터가 없습니다.</td></tr>'}</tbody></table></div>`;
-                    let html = '';
-                    if (tab === 'content') html = `<div class="flex justify-between items-center"><h2 class="text-2xl font-black">콘텐츠 관리</h2></div>${table(['제목','카테고리','TOPIK','상태','등록일','작업'], data.videos.map(v => `<tr><td class="p-3 font-bold">${e(v.title)}</td><td class="p-3">${e(v.category)}</td><td class="p-3">${e(v.topik_level)}</td><td class="p-3">${e(v.status)}</td><td class="p-3">${new Date(v.created_at).toLocaleDateString()}</td><td class="p-3"><button onclick="app.adminStatus('video','${v.id}','PUBLISHED')" class="border px-2 py-1 rounded text-xs">승인</button></td></tr>`).join(''))}`;
-                    if (tab === 'product') html = `<div class="flex justify-between items-center"><h2 class="text-2xl font-black">상품 관리</h2></div>${table(['상품명','가격','재고','상태','등록일','작업'], data.products.map(p => `<tr><td class="p-3 font-bold">${e(p.name)}</td><td class="p-3">₩${Number(p.base_price).toLocaleString()}</td><td class="p-3">${p.stock_quantity}</td><td class="p-3">${e(p.status)}</td><td class="p-3">${new Date(p.created_at).toLocaleDateString()}</td><td class="p-3"><button onclick="app.adminStatus('product','${p.id}','PUBLISHED')" class="border px-2 py-1 rounded text-xs">승인</button></td></tr>`).join(''))}`;
-                    if (tab === 'order') html = `<div class="flex justify-between items-center"><h2 class="text-2xl font-black">주문 관리</h2></div>${table(['주문번호','고객','금액','상태','주문일','작업'], data.orders.map(o => `<tr><td class="p-3 font-mono">${e(o.order_no)}</td><td class="p-3">${e(o.customer_name)}</td><td class="p-3">₩${Number(o.total_amount).toLocaleString()}</td><td class="p-3">${e(o.status)}</td><td class="p-3">${new Date(o.created_at).toLocaleDateString()}</td><td class="p-3"><button onclick="app.adminStatus('order','${o.id}','SHIPPING')" class="border px-2 py-1 rounded text-xs">배송 처리</button></td></tr>`).join(''))}`;
-                    if (tab === 'finance') html = `<h2 class="text-2xl font-black">정산 / 통계</h2><div class="grid grid-cols-3 gap-4"><div class="bg-white border rounded-xl p-5"><div class="text-xs text-slate-500">총 매출</div><div class="text-2xl font-black">₩${data.finance.sales.toLocaleString()}</div></div><div class="bg-white border rounded-xl p-5"><div class="text-xs text-slate-500">주문 수</div><div class="text-2xl font-black">${data.finance.orderCount}</div></div><div class="bg-white border rounded-xl p-5"><div class="text-xs text-slate-500">결제 완료</div><div class="text-2xl font-black">${data.finance.paidCount}</div></div></div>`;
-                    if (tab === 'board') html = `<div class="flex justify-between"><h2 class="text-2xl font-black">공지 / FAQ</h2><button onclick="app.createAdminPost('notices')" class="bg-role-admin text-white px-3 py-2 rounded text-sm">공지 추가</button></div>${table(['공지 제목','조회','공개','등록일'], data.notices.map(n => `<tr><td class="p-3 font-bold">${e(n.title)}</td><td class="p-3">${n.view_count}</td><td class="p-3">${n.is_published ? '공개' : '비공개'}</td><td class="p-3">${new Date(n.created_at).toLocaleDateString()}</td></tr>`).join(''))}<div class="mt-6">${table(['FAQ','답변','공개'], data.faqs.map(f => `<tr><td class="p-3 font-bold">${e(f.question)}</td><td class="p-3">${e(f.answer)}</td><td class="p-3">${f.is_published ? '공개' : '비공개'}</td></tr>`).join(''))}</div>`;
-                    if (tab === 'system') html = `<h2 class="text-2xl font-black">시스템 설정 / 감사 로그</h2><div class="grid md:grid-cols-2 gap-6"><div class="bg-white border rounded-xl p-5"><label class="text-xs font-bold">사이트 이름</label><input id="system-site-name" class="w-full border rounded p-2 mt-2" value="${e((data.settings.find(s => s.setting_key === 'site_name') || {}).setting_value || 'Ohseyokr')}"><button onclick="app.saveSystemSettings()" class="mt-3 bg-role-admin text-white px-4 py-2 rounded text-sm">저장</button></div>${table(['시간','관리자','작업','대상'], data.logs.map(l => `<tr><td class="p-3 text-xs">${new Date(l.created_at).toLocaleString()}</td><td class="p-3">${e(l.actor_name)}</td><td class="p-3">${e(l.action)}</td><td class="p-3">${e(l.target_table)}</td></tr>`).join(''))}</div>`;
-                    const panel = document.getElementById(`admin-view-${tab}`); if (panel) { panel.innerHTML = html; if (typeof lucide !== 'undefined') lucide.createIcons(); }
-                } catch (err) { console.error(err); }
-            },
-
-            async adminStatus(resource, id, status) { const token = localStorage.getItem('ohseyokr_token'); const r = await fetch(`/api/office/admin/${resource}/${id}/status`, { method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body:JSON.stringify({status}) }); if (r.ok) this.navigateAdmin(resource === 'video' ? 'content' : resource); else this.showToast('상태 변경에 실패했습니다.', 'error'); },
-            async createAdminPost(resource) { const title = prompt('제목'); const body = title && prompt('내용'); if (!title || !body) return; const token = localStorage.getItem('ohseyokr_token'); const payload = resource === 'notices' ? {title, body} : {question:title, answer:body}; const r = await fetch(`/api/office/admin/${resource}`, {method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(payload)}); if(r.ok) this.loadAdminOverview('board'); },
-            async saveSystemSettings() { const token = localStorage.getItem('ohseyokr_token'); const site_name = document.getElementById('system-site-name').value; const r = await fetch('/api/office/admin/settings', {method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({settings:{site_name}})}); this.showToast(r.ok ? '설정을 저장했습니다.' : '저장에 실패했습니다.', r.ok ? 'success' : 'error'); },
-
-            async loadAdminUsersList() {
-                const token = localStorage.getItem('ohseyokr_token');
-                if(!token) return;
-                try {
-                    const res = await fetch('/api/office/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
-                    if(res.ok) {
-                        const users = await res.json();
-                        const tbody = document.getElementById('admin-user-list-body');
-                        tbody.innerHTML = users.map(u => `
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-3 text-xs font-mono text-slate-500">${u.id.split('-')[0]}...</td>
-                                <td class="p-3 text-sm font-bold">${u.name}</td>
-                                <td class="p-3 text-xs text-slate-600">${u.email}</td>
-                                <td class="p-3">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold 
-                                    ${u.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 
-                                      u.role === 'STAFF' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700'}">${u.role}</span>
-                                </td>
-                                <td class="p-3 text-xs font-mono text-slate-400">${new Date(u.created_at).toISOString().split('T')[0]}</td>
-                            </tr>
-                        `).join('');
-                    }
-                } catch(e) { console.error(e); }
-            },
-
-            async loadAdminStaffList() {
-                const token = localStorage.getItem('ohseyokr_token');
-                if(!token) return;
-                try {
-                    // Fetch users who are either STAFF or ADMIN
-                    const res = await fetch('/api/office/admin/users', { headers: { 'Authorization': `Bearer ${token}` } });
-                    if(res.ok) {
-                        const users = await res.json();
-                        const staffOnly = users.filter(u => u.role === 'STAFF' || u.role === 'ADMIN');
-                        const tbody = document.getElementById('admin-staff-list-body');
-                        
-                        if(staffOnly.length === 0) {
-                            tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400">등록된 직원이 없습니다.</td></tr>`;
-                            return;
-                        }
-
-                        tbody.innerHTML = staffOnly.map(u => `
-                            <tr class="hover:bg-slate-50">
-                                <td class="p-4">
-                                    <div class="font-bold text-sm text-slate-900">${u.name}</div>
-                                    <div class="text-[10px] text-slate-500">${u.email}</div>
-                                </td>
-                                <td class="p-4">
-                                    <span class="px-2 py-1 rounded text-xs font-bold border 
-                                    ${u.role === 'ADMIN' ? 'border-purple-200 text-purple-700 bg-purple-50' : 'border-orange-200 text-orange-700 bg-orange-50'}">${u.role}</span>
-                                </td>
-                                <td class="p-4 text-xs font-mono text-slate-400">${new Date(u.created_at).toISOString().split('T')[0]}</td>
-                                <td class="p-4 text-right">
-                                    <button onclick="app.demoteStaff('${u.id}')" class="border rounded px-3 py-1 text-xs font-bold hover:bg-slate-100">회원으로 강등</button>
-                                </td>
-                            </tr>
-                        `).join('');
-                    }
-                } catch(e) { console.error(e); }
-            },
-
-            // --- Admin: Add Staff Logic ---
-            openStaffModal() {
-                document.getElementById('staff-search-email').value = '';
-                document.getElementById('staff-search-result-area').classList.add('hide');
-                this.state.tempSearchUserId = null;
-                const roleSelect = document.getElementById('staff-role-select');
-                roleSelect?.querySelector('option[value="ADMIN"]')?.remove();
-                if (!document.getElementById('staff-position-select')) {
-                    roleSelect?.parentElement.insertAdjacentHTML('afterend', `<div class="border-t pt-3"><label class="block text-xs font-bold text-slate-500 mb-2">직급</label><select id="staff-position-select" class="w-full border rounded-lg px-3 py-2 text-sm outline-none font-bold text-slate-700 bg-white"><option value="사원">사원</option><option value="주임">주임</option><option value="대리">대리</option><option value="과장">과장</option><option value="팀장">팀장</option></select></div>`);
-                }
-                
-                const modal = document.getElementById('staff-add-modal');
-                modal.classList.remove('hide', 'pointer-events-none');
-                setTimeout(() => {
-                    modal.classList.remove('opacity-0');
-                    modal.querySelector('div').classList.remove('scale-95');
-                }, 10);
-            },
-            closeStaffModal() {
-                const modal = document.getElementById('staff-add-modal');
-                modal.classList.add('opacity-0');
-                modal.querySelector('div').classList.add('scale-95');
-                setTimeout(() => {
-                    modal.classList.add('hide', 'pointer-events-none');
-                }, 300);
-            },
-            async searchUserForStaff() {
-                const email = document.getElementById('staff-search-email').value.trim();
-                if(!email) return this.showToast('이메일을 입력해주세요.', 'error');
-                
-                const token = localStorage.getItem('ohseyokr_token');
-                try {
-                    const res = await fetch(`/api/office/admin/users/search?email=${encodeURIComponent(email)}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
-                    if(res.ok) {
-                        const user = await res.json();
-                        if(user) {
-                            document.getElementById('search-res-name').innerText = user.name;
-                            document.getElementById('search-res-email').innerText = user.email;
-                            document.getElementById('search-res-role').innerText = `현재 권한: ${user.role}`;
-                            
-                            // 콤보박스 기본값 설정
-                            const select = document.getElementById('staff-role-select');
-                            select.value = user.role === 'ADMIN' ? 'ADMIN' : (user.role === 'STAFF' ? 'STAFF' : 'STAFF');
-
-                            document.getElementById('staff-search-result-area').classList.remove('hide');
-                            this.state.tempSearchUserId = user.id;
-                        } else {
-                            this.showToast('해당 이메일로 가입된 회원을 찾을 수 없습니다.', 'error');
-                        }
-                    }
-                } catch(e) { this.showToast('검색 중 오류 발생', 'error'); }
-            },
-            async grantStaffRole() {
-                if(!this.state.tempSearchUserId) return;
-                const newRole = document.getElementById('staff-role-select').value;
-                const token = localStorage.getItem('ohseyokr_token');
-                
-                try {
-                    const res = await fetch(`/api/office/admin/users/${this.state.tempSearchUserId}/role`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ role: newRole, position: document.getElementById('staff-position-select')?.value || null })
-                    });
-                    if(res.ok) {
-                        this.showToast(`✅ 성공적으로 ${newRole} 권한을 부여했습니다.`);
-                        this.closeStaffModal();
-                        this.loadAdminStaffList(); // 리스트 새로고침
-                    } else {
-                        this.showToast('권한 변경에 실패했습니다.', 'error');
-                    }
-                } catch(e) { this.showToast('오류 발생', 'error'); }
-            },
-            async demoteStaff(userId) {
-                if(!confirm('정말로 일반 회원(MEMBER)으로 강등하시겠습니까?')) return;
-                const token = localStorage.getItem('ohseyokr_token');
-                try {
-                    const res = await fetch(`/api/office/admin/users/${userId}/role`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ role: 'MEMBER', position: null })
-                    });
-                    if(res.ok) {
-                        this.showToast(`성공적으로 MEMBER로 강등되었습니다.`);
-                        this.loadAdminStaffList();
-                    }
-                } catch(e) { }
             },
 
             async loadMyPageDashboardData() {
@@ -1224,6 +1107,7 @@
                     if (res.ok) {
                         const data = await res.json();
                         
+                        // User Info
                         document.getElementById('mypage-user-name').innerText = data.user.name;
                         document.getElementById('profile-name').innerText = data.user.name;
                         document.getElementById('profile-email').innerText = this.state.user?.email || 'user@example.com';
@@ -1233,11 +1117,13 @@
                             document.getElementById('mypage-user-date').innerText = d;
                         }
 
+                        // Stats
                         document.getElementById('mypage-stat-points').innerText = data.stats.points.toLocaleString() + 'P';
                         document.getElementById('mypage-stat-coupons').innerText = data.stats.coupons + '장';
                         document.getElementById('mypage-stat-reviews').innerText = data.stats.reviews + '건';
                         document.getElementById('mypage-stat-qna').innerText = data.stats.qna + '건';
 
+                        // Orders
                         const orderContainer = document.getElementById('mypage-recent-orders');
                         if(data.orders && data.orders.length > 0) {
                             orderContainer.innerHTML = data.orders.map(o => `
@@ -1316,28 +1202,11 @@
                 if(role === 'STAFF') {
                     label.innerText = 'OFFICE (STAFF)';
                     label.className = 'bg-role-staff text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center';
-                    nav.innerHTML = `
-                        <div class="px-3 py-2 text-slate-400">대시보드</div>
-                        <div class="px-3 py-2 bg-orange-50 text-role-staff rounded font-bold">콘텐츠 관리</div>
-                    `;
-                } else if (role === 'ADMIN') {
+                    nav.innerHTML = `<div class="px-3 py-2 text-slate-400">대시보드</div><div class="px-3 py-2 bg-orange-50 text-role-staff rounded font-bold">콘텐츠 관리</div>`;
+                } else {
                     label.innerText = 'OFFICE (ADMIN)';
                     label.className = 'bg-role-admin text-white text-[10px] px-2 py-1 rounded font-bold tracking-widest block text-center';
-                    
-                    // Wireframe 9 Menu Tabs
-                    nav.innerHTML = `
-                        <button onclick="app.navigateAdmin('dashboard')" data-tab="dashboard" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="bar-chart-2" class="w-4 h-4 mr-2"></i> 대시보드</button>
-                        <button onclick="app.navigateAdmin('content')" data-tab="content" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="youtube" class="w-4 h-4 mr-2"></i> 콘텐츠 관리</button>
-                        <button onclick="app.navigateAdmin('product')" data-tab="product" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="package" class="w-4 h-4 mr-2"></i> 상품 관리</button>
-                        <button onclick="app.navigateAdmin('order')" data-tab="order" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="shopping-bag" class="w-4 h-4 mr-2"></i> 주문 관리</button>
-                        <button onclick="app.navigateAdmin('finance')" data-tab="finance" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="dollar-sign" class="w-4 h-4 mr-2"></i> 정산/통계</button>
-                        <button onclick="app.navigateAdmin('user')" data-tab="user" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="users" class="w-4 h-4 mr-2"></i> 회원 관리</button>
-                        <button onclick="app.navigateAdmin('staff')" data-tab="staff" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="briefcase" class="w-4 h-4 mr-2"></i> 직원 관리</button>
-                        <button onclick="app.navigateAdmin('board')" data-tab="board" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center mb-1"><i data-lucide="clipboard-list" class="w-4 h-4 mr-2"></i> 공지/FAQ</button>
-                        <button onclick="app.navigateAdmin('system')" data-tab="system" class="admin-nav-btn w-full text-left px-3 py-2.5 text-slate-600 rounded font-bold hover:bg-slate-50 flex items-center"><i data-lucide="settings" class="w-4 h-4 mr-2"></i> 시스템 설정</button>
-                    `;
-                    // Lucide icons re-render required for innerHTML
-                    setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 10);
+                    nav.innerHTML = `<div class="px-3 py-2 bg-purple-50 text-role-admin rounded font-bold">종합 대시보드</div><div class="px-3 py-2 text-slate-600 hover:bg-slate-50 rounded">시스템 설정</div>`;
                 }
             },
 
@@ -1419,7 +1288,7 @@
                         this.showToast('🎉 결제가 성공적으로 완료되었습니다!');
                         this.loadData(); 
                         if (document.getElementById('view-mypage').classList.contains('hide') === false) {
-                            this.loadMyPageDashboardData(); 
+                            this.loadMyPageDashboardData(); // Refresh mypage if open
                         }
                     } else {
                         this.showToast('결제 처리 중 오류가 발생했습니다.', 'error');
@@ -1437,7 +1306,6 @@
                     if (res.ok) {
                         this.showToast('✨ 대기 중인 모든 항목이 일괄 승인(게시)되었습니다!');
                         this.loadData(); 
-                        this.loadDashboardData();
                     } else {
                         this.showToast('권한이 부족하거나 오류가 발생했습니다.', 'error');
                     }
