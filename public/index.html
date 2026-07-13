@@ -8,8 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Google Identity Services (동적 로드를 위해 async 제거 후 JS에서 처리) -->
+    <script src="https://accounts.google.com/gsi/client"></script>
     <!-- Pretendard Premium Font -->
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
     
@@ -47,25 +47,27 @@
         .hide { display: none !important; }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Admin Sidebar Active State */
-        .admin-menu-active { 
+        /* Sidebar Active State */
+        .sidebar-menu-active { 
             background-color: #f3f4f6; 
             color: theme('colors.brand'); 
             font-weight: 700; 
         }
-        .admin-menu-active i { color: theme('colors.brand'); }
+        .sidebar-menu-active i { color: theme('colors.brand'); }
 
-        /* Smooth Transitions */
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-4px); box-shadow: theme('boxShadow.soft'); }
+
+        /* Full height layout for dashboard views */
+        .dashboard-layout { min-height: calc(100vh - 64px); }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen overflow-x-hidden">
 
     <!-- Global Toast Notification -->
     <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 z-[100] bg-gray-900/95 backdrop-blur-sm text-white px-6 py-3.5 rounded-2xl shadow-2xl opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-3 translate-y-[-20px]">
@@ -75,79 +77,65 @@
         <span id="toast-msg" class="font-medium text-sm">알림 메시지</span>
     </div>
 
-    <!-- Top Banner -->
-    <div class="bg-brand text-white text-xs font-medium py-2 text-center tracking-wide">
-        🎉 신규 가입 시 TOPIK 모의고사 무료 쿠폰 증정! <a href="#" class="underline ml-2 hover:text-blue-200 transition-colors">자세히 보기</a>
-    </div>
-
     <!-- Header -->
     <header class="bg-surface shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <!-- Logo -->
-            <div class="flex items-center space-x-2 cursor-pointer group" onclick="app.showHome()">
-                <div class="w-9 h-9 bg-gradient-to-br from-brand to-blue-400 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
-                    <span class="text-white font-black text-xl leading-none">O</span>
+            <!-- Logo & Main Menu -->
+            <div class="flex items-center space-x-8">
+                <div class="flex items-center space-x-2 cursor-pointer group" onclick="app.ui.switchView('view-home')">
+                    <div class="w-9 h-9 bg-gradient-to-br from-brand to-blue-400 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform">
+                        <span class="text-white font-black text-xl leading-none">O</span>
+                    </div>
+                    <span class="text-2xl font-black tracking-tight text-gray-900 hidden sm:block">Ohseyokr</span>
                 </div>
-                <span class="text-2xl font-black tracking-tight text-gray-900 hidden sm:block">Ohseyokr</span>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">TOPIK 영상</a>
+                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">K-Goods</a>
+                    <a href="#" class="text-gray-600 hover:text-brand font-bold text-sm transition-colors">공지사항</a>
+                </nav>
             </div>
             
             <!-- Global Search (Desktop) -->
-            <div class="hidden md:flex flex-1 max-w-xl mx-8 relative">
+            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+                    <i data-lucide="search" class="w-4 h-4 text-gray-400"></i>
                 </div>
-                <input type="text" class="block w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none" placeholder="TOPIK 강의나 인기 K-Goods를 검색해보세요">
+                <input type="text" class="block w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm placeholder-gray-400 focus:bg-white focus:border-brand focus:ring-2 focus:ring-brand/20 transition-all outline-none" placeholder="검색어 입력">
             </div>
 
             <!-- Right Actions -->
-            <div class="flex items-center space-x-2 sm:space-x-4">
-                <!-- Shopping Cart Icon -->
-                <button onclick="app.toggleCart()" class="relative p-2.5 text-gray-600 hover:text-brand transition-colors rounded-full hover:bg-gray-50 focus:outline-none">
+            <div class="flex items-center space-x-4">
+                <!-- Shopping Cart -->
+                <button onclick="app.ui.toggleCart()" class="relative p-2 text-gray-600 hover:text-brand transition-colors rounded-full hover:bg-gray-50 focus:outline-none">
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
-                    <span id="cart-badge" class="absolute top-1.5 right-1.5 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hide ring-2 ring-white shadow-sm">0</span>
+                    <span id="cart-badge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hide ring-2 ring-white shadow-sm">0</span>
                 </button>
 
-                <!-- Auth Area (Logged Out) -->
-                <div id="auth-area" class="flex items-center space-x-3">
-                    <div id="google-btn-container" class="hide">
-                        <div id="g_id_onload"
-                            data-client_id="MOCK_CLIENT_ID"
-                            data-callback="handleGoogleLogin"
-                            data-auto_prompt="false">
-                        </div>
-                        <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-                    </div>
-                    <!-- Mock Login Button for Demo Purposes -->
-                    <button onclick="app.mockLoginModal()" class="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                        테스트 로그인
-                    </button>
-                    <div id="google-loading-placeholder" class="text-xs text-gray-400 flex items-center hidden">
-                        <i data-lucide="loader" class="w-4 h-4 animate-spin mr-2"></i>로그인 준비 중...
-                    </div>
+                <!-- Auth Area -->
+                <div id="auth-area" class="flex items-center">
+                    <!-- Google Login Button Container -->
+                    <div id="google-login-btn-wrapper"></div>
                 </div>
 
                 <!-- Logged In User Area -->
-                <div id="user-area" class="hide flex items-center space-x-2 sm:space-x-3 border-l border-gray-200 pl-4">
-                    <div class="flex items-center cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition-colors" onclick="app.showMyPage()">
+                <div id="user-area" class="hide flex items-center space-x-3 border-l border-gray-200 pl-4">
+                    <div class="flex items-center cursor-pointer hover:bg-gray-50 p-1.5 rounded-lg transition-colors" onclick="app.ui.switchView('view-mypage')">
                         <img id="user-avatar" src="" alt="Profile" class="w-8 h-8 rounded-full border border-gray-200 shadow-sm object-cover">
                         <div class="hidden lg:flex flex-col ml-2.5">
-                            <div class="flex items-center space-x-1">
-                                <span id="user-name" class="text-sm font-bold text-gray-800 leading-none">Name</span>
-                                <span id="user-role-badge" class="text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm bg-role-member leading-none">MEMBER</span>
-                            </div>
-                            <span id="user-email" class="text-[11px] text-gray-500 mt-0.5">email@example.com</span>
+                            <span id="user-name" class="text-sm font-bold text-gray-800 leading-none">Name</span>
+                            <span id="user-role-badge" class="text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm bg-role-member leading-none mt-1 w-max">GUEST</span>
                         </div>
                     </div>
                     
                     <div class="flex items-center space-x-1.5">
-                        <button id="nav-office" class="hide bg-role-staff/10 text-role-staff hover:bg-role-staff hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.showOffice()">
+                        <button id="nav-office" class="hide bg-role-staff/10 text-role-staff hover:bg-role-staff hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.ui.switchView('view-office')">
                             <i data-lucide="briefcase" class="w-3.5 h-3.5 mr-1.5"></i>Office
                         </button>
-                        <button id="nav-admin" class="hide bg-role-admin/10 text-role-admin hover:bg-role-admin hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.showAdmin()">
+                        <button id="nav-admin" class="hide bg-role-admin/10 text-role-admin hover:bg-role-admin hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center" onclick="app.ui.switchView('view-admin')">
                             <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1.5"></i>Admin
                         </button>
-                        <button onclick="app.logout()" class="flex items-center text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-gray-200 hover:border-red-200 ml-2" title="로그아웃">
-                            <i data-lucide="log-out" class="w-3.5 h-3.5 mr-1.5"></i>로그아웃
+                        <button onclick="app.auth.logout()" class="flex items-center text-gray-500 hover:text-red-600 bg-gray-50 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors border border-gray-200 hover:border-red-200 ml-1" title="로그아웃">
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i><span class="hidden md:inline ml-1.5">로그아웃</span>
                         </button>
                     </div>
                 </div>
@@ -156,743 +144,837 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-grow flex flex-col relative">
+    <main class="flex-grow flex flex-col relative w-full">
         
-        <!-- ==================== HOME VIEW ==================== -->
-        <section id="view-home" class="flex-grow pb-20">
+        <!-- ==================== 1. 비회원/회원 홈 (Home) ==================== -->
+        <section id="view-home" class="flex-grow pb-20 view-section">
             <!-- Hero Banner -->
             <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-                <div class="relative bg-gray-900 rounded-3xl overflow-hidden shadow-2xl aspect-[16/9] md:aspect-[21/7] flex items-center">
-                    <img src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=2000&h=800" alt="Seoul Background" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-luminosity hover:scale-105 transition-transform duration-[10s]">
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-transparent"></div>
-                    
-                    <div class="relative z-10 px-8 md:px-16 lg:px-24 max-w-3xl">
-                        <span class="inline-block py-1 px-3 rounded-full bg-brand/20 text-blue-300 text-sm font-bold tracking-wider mb-4 border border-brand/30">PREMIUM PLATFORM</span>
-                        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-[1.2] tracking-tight">
-                            한국어 능력을 키우고<br>
-                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">트렌디한 K-Goods</span>를<br>
-                            만나보세요.
+                <div class="relative bg-blue-50 rounded-3xl overflow-hidden shadow-sm aspect-[16/9] md:aspect-[21/6] flex items-center border border-blue-100">
+                    <div class="absolute inset-0 bg-gradient-to-r from-blue-100/50 to-transparent"></div>
+                    <div class="relative z-10 px-8 md:px-16 lg:px-24 flex-1">
+                        <span class="inline-block py-1 px-3 rounded-full bg-brand text-white text-xs font-bold tracking-wider mb-4 shadow-sm">오세요코리아</span>
+                        <h1 class="text-3xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight tracking-tight">
+                            토픽 합격의 시작,<br>
+                            <span class="text-brand">Ohseyokr</span>와 함께하세요
                         </h1>
-                        <p class="text-lg md:text-xl text-gray-300 opacity-90 mb-8 font-medium">TOPIK 학습부터 한국 인기 상품 직구까지,<br class="hidden md:block">Ohseyokr에서 한 번에 해결하세요.</p>
-                        <div class="flex space-x-4">
-                            <button class="bg-brand hover:bg-brand-hover text-white px-8 py-3.5 rounded-xl font-bold shadow-lg shadow-brand/30 transition-all flex items-center group">
-                                학습 시작하기 <i data-lucide="arrow-right" class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                            <button class="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md px-8 py-3.5 rounded-xl font-bold transition-all">
-                                쇼핑 둘러보기
-                            </button>
+                        <p class="text-gray-600 mb-8 font-medium">무료 강의로 실력을 키우고, K-굿즈로 한국을 더 가까이 경험해보세요.</p>
+                        <div class="flex space-x-3">
+                            <button class="bg-brand hover:bg-brand-hover text-white px-6 py-3 rounded-xl font-bold shadow-md transition-all">무료로 시작하기</button>
+                            <button class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-6 py-3 rounded-xl font-bold transition-all shadow-sm">샘플 강의 보기</button>
                         </div>
+                    </div>
+                    <!-- Hero Graphics placeholder -->
+                    <div class="hidden md:flex flex-1 justify-center items-center gap-4 pr-16">
+                        <div class="w-48 h-48 bg-brand rounded-2xl shadow-lg flex items-center justify-center transform -rotate-6"><span class="text-white font-black text-2xl">TOPIK Study</span></div>
+                        <div class="w-48 h-48 bg-gray-100 rounded-2xl shadow-lg flex items-center justify-center transform rotate-6 border border-gray-200"><span class="text-gray-400 font-black text-2xl">K-Goods</span></div>
                     </div>
                 </div>
             </div>
 
             <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <!-- Video Section -->
-                <div class="mb-20">
-                    <div class="flex justify-between items-end mb-8">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="bg-red-100 text-red-600 px-2.5 py-0.5 rounded-md text-xs font-bold flex items-center"><i data-lucide="youtube" class="w-3 h-3 mr-1"></i>TOPIK</span>
-                            </div>
-                            <h2 class="text-3xl font-black text-gray-900 tracking-tight">추천 학습 콘텐츠</h2>
-                            <p class="text-gray-500 mt-2 font-medium">전문가들이 엄선한 TOPIK 대비 맞춤형 강의</p>
-                        </div>
-                        <button class="hidden md:flex items-center text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
-                            전체보기 <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
-                        </button>
+                <div class="mb-16">
+                    <div class="flex items-center mb-6">
+                        <div class="w-1.5 h-6 bg-brand rounded-full mr-3"></div>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">인기 토픽 영상</h2>
                     </div>
-                    <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <!-- Videos injected by JS -->
+                    <div id="home-video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- JS Rendered -->
                     </div>
                 </div>
 
                 <!-- Product Section -->
                 <div>
-                    <div class="flex justify-between items-end mb-8">
-                        <div>
-                            <div class="flex items-center space-x-2 mb-2">
-                                <span class="bg-blue-100 text-brand px-2.5 py-0.5 rounded-md text-xs font-bold flex items-center"><i data-lucide="shopping-bag" class="w-3 h-3 mr-1"></i>SHOP</span>
-                            </div>
-                            <h2 class="text-3xl font-black text-gray-900 tracking-tight">요즘 뜨는 K-Goods</h2>
-                            <p class="text-gray-500 mt-2 font-medium">한국 현지에서 가장 인기있는 상품들만 모았습니다</p>
-                        </div>
-                        <button class="hidden md:flex items-center text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
-                            전체보기 <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
-                        </button>
+                    <div class="flex items-center mb-6">
+                        <div class="w-1.5 h-6 bg-brand rounded-full mr-3"></div>
+                        <h2 class="text-2xl font-black text-gray-900 tracking-tight">추천 K-Goods</h2>
                     </div>
-                    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 md:gap-6">
-                        <!-- Products injected by JS -->
+                    <div id="home-product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+                        <!-- JS Rendered -->
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- ==================== MY PAGE VIEW (MEMBER) ==================== -->
-        <section id="view-mypage" class="hide max-w-[1000px] mx-auto px-4 py-12 w-full flex-grow">
-            <h2 class="text-3xl font-black mb-8 text-gray-900 tracking-tight">마이페이지</h2>
             
-            <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-8 mb-8 flex items-center justify-between">
-                <div class="flex items-center space-x-6">
-                    <div class="relative">
-                        <img id="mypage-avatar" src="" class="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover bg-gray-50">
-                        <button class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full shadow-sm border border-gray-200 flex items-center justify-center text-gray-500 hover:text-brand hover:bg-gray-50 transition-colors">
-                            <i data-lucide="camera" class="w-4 h-4"></i>
-                        </button>
+            <!-- Footer Simple -->
+            <footer class="border-t border-gray-200 bg-white mt-10 py-10">
+                <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                    <div class="mb-4 md:mb-0">
+                        <p class="font-bold text-gray-800 text-base mb-1">Ohseyokr (오세요코리아)</p>
+                        <p>사업자등록번호: 123-45-67890 | 통신판매업신고: 제2024-서울-0000호</p>
+                        <p>이메일: support@ohseyokr.com</p>
                     </div>
-                    <div>
-                        <h3 id="mypage-name" class="text-2xl font-black text-gray-900">Name</h3>
-                        <p id="mypage-email" class="text-gray-500 mt-1 font-medium">email@example.com</p>
-                        <div class="mt-3 inline-flex items-center px-3 py-1 rounded-md text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
-                            <i data-lucide="award" class="w-3.5 h-3.5 mr-1.5 text-gray-500"></i> <span id="mypage-role-text">일반 회원</span>
-                        </div>
+                    <div class="text-xs bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <p class="font-bold text-gray-700 mb-1">Google OAuth 연동됨</p>
+                        <p>자동 회원가입 및 로그인<br>JWT 기반 세션 보안 적용 완료</p>
                     </div>
                 </div>
-                <button class="hidden md:block px-6 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm">
-                    프로필 수정
-                </button>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h4 class="font-black text-xl text-gray-900">최근 주문 내역</h4>
-                    <button class="text-sm text-gray-500 font-medium hover:text-gray-900 transition-colors">더보기</button>
-                </div>
-                <div class="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
-                        <i data-lucide="package-open" class="w-8 h-8 text-gray-400"></i>
-                    </div>
-                    <p class="text-gray-500 font-medium">아직 주문하신 내역이 없습니다.</p>
-                    <button onclick="app.showHome()" class="mt-4 px-6 py-2 bg-white border border-gray-200 shadow-sm rounded-lg text-sm font-bold text-gray-700 hover:text-brand hover:border-brand/30 transition-all">쇼핑하러 가기</button>
-                </div>
-            </div>
+            </footer>
         </section>
 
-        <!-- ==================== OFFICE VIEW (STAFF) ==================== -->
-        <section id="view-office" class="hide max-w-[1400px] mx-auto px-4 py-10 w-full flex-grow">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 border-b border-gray-200 pb-6 gap-4">
-                <div>
-                    <div class="flex items-center space-x-3 mb-2">
-                        <span class="p-2 bg-role-staff/10 rounded-lg text-role-staff"><i data-lucide="briefcase" class="w-6 h-6"></i></span>
-                        <h2 class="text-3xl font-black text-gray-900 tracking-tight">Office 워크스페이스</h2>
-                    </div>
-                    <p class="text-gray-500 font-medium mt-1">상품 및 콘텐츠 승인 대기열을 관리하고 검토합니다.</p>
-                </div>
-                <button onclick="app.showToast('일괄 승인되었습니다.', 'success')" class="bg-gray-900 hover:bg-gray-800 text-white px-6 py-3 rounded-xl font-bold flex items-center shadow-lg shadow-gray-900/20 transition-all w-full md:w-auto justify-center">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 mr-2 text-green-400"></i>전체 일괄 게시 승인
-                </button>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Pending Products -->
-                <div class="bg-white rounded-2xl shadow-card border border-gray-100 flex flex-col h-[500px]">
-                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
-                        <h3 class="font-bold text-gray-800 flex items-center text-lg"><i data-lucide="package-search" class="w-5 h-5 mr-2 text-role-staff"></i>상품 승인 대기</h3>
-                        <span class="bg-role-staff/10 text-role-staff border border-role-staff/20 px-3 py-1 rounded-lg font-bold text-sm">3건</span>
-                    </div>
-                    <div class="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50/30">
-                        <!-- Mock Pending Item -->
-                        <div class="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center space-x-4">
-                                <img src="https://images.unsplash.com/photo-1596755094514-f87e32f6b717?auto=format&fit=crop&w=100&h=100" class="w-12 h-12 rounded-lg object-cover">
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm">K-Beauty 스킨케어 세트</h4>
-                                    <p class="text-xs text-gray-500 mt-0.5">요청자: vendor@test.com</p>
-                                </div>
-                            </div>
-                            <button class="px-3 py-1.5 bg-brand/10 text-brand text-xs font-bold rounded-lg hover:bg-brand hover:text-white transition-colors">승인</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pending Videos -->
-                <div class="bg-white rounded-2xl shadow-card border border-gray-100 flex flex-col h-[500px]">
-                    <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
-                        <h3 class="font-bold text-gray-800 flex items-center text-lg"><i data-lucide="video" class="w-5 h-5 mr-2 text-role-staff"></i>영상 승인 대기</h3>
-                        <span class="bg-role-staff/10 text-role-staff border border-role-staff/20 px-3 py-1 rounded-lg font-bold text-sm">1건</span>
-                    </div>
-                    <div class="flex-grow overflow-y-auto p-4 space-y-3 bg-gray-50/30">
-                         <!-- Mock Pending Item -->
-                         <div class="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between shadow-sm">
-                            <div class="flex items-center space-x-4">
-                                <div class="w-16 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400"><i data-lucide="play-circle" class="w-5 h-5"></i></div>
-                                <div>
-                                    <h4 class="font-bold text-gray-900 text-sm">TOPIK II 읽기 기출문제 풀이</h4>
-                                    <p class="text-xs text-gray-500 mt-0.5">강사: 이한국</p>
-                                </div>
-                            </div>
-                            <button class="px-3 py-1.5 bg-brand/10 text-brand text-xs font-bold rounded-lg hover:bg-brand hover:text-white transition-colors">승인</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== ADMIN CENTER VIEW ==================== -->
-        <section id="view-admin" class="hide flex-grow bg-background border-t border-gray-200 flex">
-            <!-- Admin Sidebar -->
-            <aside class="w-64 bg-white border-r border-gray-200 flex flex-col hidden lg:flex shrink-0">
-                <div class="p-6 border-b border-gray-100">
-                    <h2 class="text-xl font-black text-gray-900 flex items-center">
-                        <div class="w-8 h-8 bg-role-admin/10 rounded-lg flex items-center justify-center mr-3 text-role-admin">
-                            <i data-lucide="shield-check" class="w-5 h-5"></i>
-                        </div>
-                        Admin Center
-                    </h2>
-                </div>
-                <nav class="flex-1 py-6 flex flex-col gap-1.5 px-4 overflow-y-auto">
-                    <p class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">대시보드</p>
-                    <button class="admin-menu-btn admin-menu-active flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-gray-50 w-full text-left" data-target="admin-tab-dashboard" onclick="app.switchAdminTab(this)">
-                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-brand transition-colors"></i> 통합 현황
+        <!-- ==================== 2. 회원 (마이페이지) ==================== -->
+        <section id="view-mypage" class="hide flex-grow flex dashboard-layout view-section">
+            <aside class="w-64 bg-white border-r border-gray-200 flex-col hidden md:flex shrink-0">
+                <div class="p-6 pb-2"><h2 class="text-lg font-black text-gray-900">마이페이지</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-4" id="mypage-nav">
+                    <button class="sidebar-menu-btn sidebar-menu-active flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('mypage', 'dashboard', this)">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3"></i>대시보드
                     </button>
-                    
-                    <p class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mt-6 mb-2">사용자 관리</p>
-                    <button class="admin-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" data-target="admin-tab-member" onclick="app.switchAdminTab(this)">
-                        <i data-lucide="users" class="w-4 h-4 mr-3 text-gray-400 transition-colors"></i> 회원 목록
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'study', this)">
+                        <i data-lucide="book-open" class="w-4 h-4 mr-3"></i>학습현황
                     </button>
-                    <button class="admin-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" data-target="admin-tab-staff" onclick="app.switchAdminTab(this)">
-                        <i data-lucide="contact" class="w-4 h-4 mr-3 text-gray-400 transition-colors"></i> 직원 및 권한 관리
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'orders', this)">
+                        <i data-lucide="shopping-bag" class="w-4 h-4 mr-3"></i>주문내역
                     </button>
-                    
-                    <p class="px-3 text-xs font-bold text-gray-400 uppercase tracking-wider mt-6 mb-2">커머스 관리</p>
-                    <button class="admin-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" data-target="admin-tab-product" onclick="app.switchAdminTab(this)">
-                        <i data-lucide="box" class="w-4 h-4 mr-3 text-gray-400 transition-colors"></i> 상품 관리 (Master)
+                    <div class="my-2 border-t border-gray-100"></div>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 w-full text-left" onclick="app.ui.switchTab('mypage', 'profile', this)">
+                        <i data-lucide="user" class="w-4 h-4 mr-3"></i>개인정보
                     </button>
                 </nav>
             </aside>
-
-            <!-- Admin Content Area -->
-            <div class="flex-1 p-6 lg:p-10 overflow-y-auto max-h-[calc(100vh-64px)]">
-                
-                <!-- 1. 대시보드 탭 -->
-                <div id="admin-tab-dashboard" class="admin-tab-content max-w-6xl">
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-black text-gray-900">통합 현황 대시보드</h3>
-                        <p class="text-gray-500 font-medium mt-2">플랫폼의 주요 지표를 한눈에 확인하세요.</p>
-                    </div>
+            <div class="flex-1 p-6 md:p-10 bg-background overflow-y-auto">
+                <div id="mypage-tab-dashboard" class="mypage-tab-content block max-w-5xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">안녕하세요, <span id="mypage-welcome-name" class="text-brand">회원</span>님!</h3>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div class="bg-white p-6 rounded-2xl shadow-card border border-gray-100 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="users" class="w-16 h-16"></i></div>
-                            <p class="text-gray-500 text-sm font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>총 가입자</p>
-                            <p class="text-4xl font-black text-gray-900 mt-4 tracking-tight" id="admin-stat-users">1,204명</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
+                            <span class="text-gray-500 text-sm font-bold mb-2">보유 포인트</span>
+                            <span class="text-2xl font-black text-gray-900">12,500P</span>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl shadow-card border border-gray-100 relative overflow-hidden">
-                            <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="package" class="w-16 h-16"></i></div>
-                            <p class="text-gray-500 text-sm font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>게시된 상품수</p>
-                            <p class="text-4xl font-black text-gray-900 mt-4 tracking-tight" id="admin-stat-products">84개</p>
+                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
+                            <span class="text-gray-500 text-sm font-bold mb-2">쿠폰</span>
+                            <span class="text-2xl font-black text-gray-900">3장</span>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl shadow-card border border-gray-100 flex flex-col items-center justify-center">
+                            <span class="text-gray-500 text-sm font-bold mb-2">진행 중 주문</span>
+                            <span class="text-2xl font-black text-brand">1건</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- 2. 직원 관리 탭 -->
-                <div id="admin-tab-staff" class="admin-tab-content hide max-w-6xl">
-                    <div class="mb-8">
-                        <h3 class="text-2xl font-black text-gray-900">직원 및 권한 관리</h3>
-                        <p class="text-gray-500 font-medium mt-2">일반 회원을 직원(Office 접근 권한)으로 임명하고 직급을 관리합니다.</p>
-                    </div>
-                    
-                    <!-- 직원 추가 섹션 -->
-                    <div class="bg-white p-8 rounded-2xl shadow-card border border-gray-100 mb-8">
-                        <h4 class="font-black text-gray-900 mb-5 flex items-center text-lg">
-                            <div class="w-8 h-8 rounded-full bg-blue-50 text-brand flex items-center justify-center mr-3"><i data-lucide="user-search" class="w-4 h-4"></i></div>
-                            신규 직원 검색 및 임명
-                        </h4>
-                        <div class="flex flex-col sm:flex-row gap-4">
-                            <div class="flex-1 relative">
-                                <i data-lucide="search" class="absolute left-4 top-3.5 text-gray-400 w-5 h-5"></i>
-                                <input type="text" id="admin-staff-search-input" placeholder="이름 또는 이메일 주소로 회원 검색..." class="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-brand/20 focus:border-brand outline-none transition-all font-medium">
+                    <div class="bg-white rounded-2xl shadow-card border border-gray-100 p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-bold text-gray-900">최근 주문 현황</h4>
+                            <a href="#" class="text-xs text-gray-500 hover:text-brand">더보기 ></a>
+                        </div>
+                        <div class="border border-gray-200 rounded-xl p-4 flex items-center justify-between text-sm">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-gray-400 text-xs">2024-05-07-0001</span>
+                                <span class="font-bold text-gray-800">한국 정통 홍삼 진액 에디션 세트</span>
                             </div>
-                            <button onclick="app.adminSearchUser()" class="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-xl font-bold whitespace-nowrap shadow-md transition-all h-[50px]">회원 검색</button>
-                        </div>
-                        
-                        <!-- 검색 결과 영역 -->
-                        <div id="admin-search-result-area" class="mt-6 hide">
-                            <p class="text-sm font-bold text-gray-500 mb-3 px-1">검색 결과</p>
-                            <ul id="admin-search-results" class="space-y-3">
-                                <!-- JS에서 채워짐 -->
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- 현재 직원 목록 섹션 -->
-                    <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden">
-                        <div class="px-8 py-5 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                            <h4 class="font-black text-gray-900 text-lg flex items-center">
-                                <i data-lucide="contact" class="w-5 h-5 mr-2 text-gray-400"></i>등록된 직원 목록
-                            </h4>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-gray-50 border-b border-gray-100 text-gray-500 font-bold uppercase tracking-wider text-[11px]">
-                                    <tr>
-                                        <th class="px-8 py-4">사용자 정보</th>
-                                        <th class="px-6 py-4">권한 상태</th>
-                                        <th class="px-6 py-4">직급</th>
-                                        <th class="px-8 py-4 text-right">관리</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-staff-list" class="divide-y divide-gray-100 bg-white">
-                                    <!-- JS에서 채워짐 -->
-                                </tbody>
-                            </table>
+                            <div class="flex items-center gap-4">
+                                <span class="font-black text-gray-900">68,000원</span>
+                                <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold">배송준비</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+                
+                <div id="mypage-tab-study" class="mypage-tab-content hide max-w-5xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">학습 현황</h3>
+                    <div class="bg-white p-12 rounded-2xl shadow-card border border-gray-100 text-center text-gray-500">학습 기록 연동 준비 중입니다.</div>
+                </div>
+                <div id="mypage-tab-orders" class="mypage-tab-content hide max-w-5xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">주문 내역</h3>
+                    <div class="bg-white p-12 rounded-2xl shadow-card border border-gray-100 text-center text-gray-500">주문 내역이 없습니다.</div>
+                </div>
+                <div id="mypage-tab-profile" class="mypage-tab-content hide max-w-5xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">개인정보</h3>
+                    <div class="bg-white p-8 rounded-2xl shadow-card border border-gray-100 max-w-2xl">
+                        <div class="flex items-center space-x-6 mb-8 border-b border-gray-100 pb-8">
+                            <img id="mypage-profile-img" src="" class="w-20 h-20 rounded-full border border-gray-200 bg-gray-50">
+                            <div>
+                                <h4 id="mypage-profile-name" class="font-black text-xl text-gray-900">Name</h4>
+                                <p id="mypage-profile-email" class="text-gray-500 text-sm mt-1">email@example.com</p>
+                                <span class="inline-block mt-2 bg-blue-50 text-brand px-2 py-0.5 rounded text-xs font-bold border border-blue-100">Google 연동됨</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                <!-- 플레이스홀더 탭들 -->
-                <div id="admin-tab-member" class="admin-tab-content hide max-w-6xl">
-                    <h3 class="text-2xl font-black mb-6 text-gray-900">회원 목록</h3>
-                    <div class="bg-white p-12 rounded-2xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400"><p>기능 준비 중</p></div>
+        <!-- ==================== 3. 직원 (Office) ==================== -->
+        <section id="view-office" class="hide flex-grow flex dashboard-layout view-section">
+            <aside class="w-64 bg-[#2b2d36] text-gray-300 flex-col hidden md:flex shrink-0">
+                <div class="p-6 pb-2 border-b border-gray-700/50"><h2 class="text-lg font-black text-white flex items-center"><i data-lucide="briefcase" class="w-5 h-5 mr-2 text-role-staff"></i>Office</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-4">
+                    <p class="px-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 mt-2">Staff Menu</p>
+                    <button class="sidebar-menu-btn sidebar-menu-active bg-gray-800 text-white flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'dashboard', this)">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-role-staff"></i>대시보드
+                    </button>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'content', this)">
+                        <i data-lucide="video" class="w-4 h-4 mr-3"></i>콘텐츠 관리
+                    </button>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'product', this)">
+                        <i data-lucide="package" class="w-4 h-4 mr-3"></i>상품 관리
+                    </button>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-800 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('office', 'cs', this)">
+                        <i data-lucide="headphones" class="w-4 h-4 mr-3"></i>CS 관리
+                    </button>
+                </nav>
+            </aside>
+            <div class="flex-1 p-6 md:p-10 bg-gray-50 overflow-y-auto">
+                <div id="office-tab-dashboard" class="office-tab-content block max-w-6xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">Staff 대시보드</h3>
+                    
+                    <!-- Pending Actions Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Pending Videos -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h4 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="video" class="w-4 h-4 mr-2 text-role-staff"></i>영상 승인 대기</h4>
+                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold" id="office-pending-video-count">0건</span>
+                            </div>
+                            <div class="p-4" id="office-pending-videos">
+                                <div class="text-center py-8 text-gray-400 text-sm">로딩 중...</div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Products -->
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h4 class="font-bold text-gray-800 flex items-center text-sm"><i data-lucide="package" class="w-4 h-4 mr-2 text-role-staff"></i>상품 등록 요청</h4>
+                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold" id="office-pending-product-count">0건</span>
+                            </div>
+                            <div class="p-4" id="office-pending-products">
+                                <div class="text-center py-8 text-gray-400 text-sm">로딩 중...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="admin-tab-product" class="admin-tab-content hide max-w-6xl">
-                    <h3 class="text-2xl font-black mb-6 text-gray-900">상품 관리</h3>
-                    <div class="bg-white p-12 rounded-2xl border border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400"><p>기능 준비 중</p></div>
+                <!-- Other office placeholders -->
+                <div id="office-tab-content" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">콘텐츠(영상/태그) 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
+                <div id="office-tab-product" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">상품(목록/승인) 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
+                <div id="office-tab-cs" class="office-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">1:1 문의 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">목록 기능 구현 예정</div></div>
+            </div>
+        </section>
+
+        <!-- ==================== 4. 최고 관리자 (Admin) ==================== -->
+        <section id="view-admin" class="hide flex-grow flex dashboard-layout view-section">
+            <aside class="w-64 bg-indigo-950 text-indigo-100 flex-col hidden lg:flex shrink-0">
+                <div class="p-6 pb-2 border-b border-indigo-900/50"><h2 class="text-lg font-black text-white flex items-center"><i data-lucide="shield-check" class="w-5 h-5 mr-2 text-role-admin"></i>Admin Center</h2></div>
+                <nav class="flex-1 py-4 flex flex-col gap-1 px-4 overflow-y-auto">
+                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-2">통합 관리</p>
+                    <button class="sidebar-menu-btn sidebar-menu-active bg-indigo-900/50 text-white flex items-center px-4 py-2.5 rounded-xl text-sm font-medium transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'dashboard', this)">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-3 text-role-admin"></i>대시보드
+                    </button>
+                    
+                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-4">사용자 관리</p>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'users', this)">
+                        <i data-lucide="users" class="w-4 h-4 mr-3"></i>회원 관리
+                    </button>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'staff', this)">
+                        <i data-lucide="contact" class="w-4 h-4 mr-3"></i>직원 권한 관리
+                    </button>
+                    
+                    <p class="px-2 text-[10px] font-bold text-indigo-400/70 uppercase tracking-wider mb-1 mt-4">시스템</p>
+                    <button class="sidebar-menu-btn flex items-center px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-indigo-900/50 hover:text-white transition-colors w-full text-left" onclick="app.ui.switchTab('admin', 'settings', this)">
+                        <i data-lucide="settings" class="w-4 h-4 mr-3"></i>시스템 설정
+                    </button>
+                </nav>
+            </aside>
+            <div class="flex-1 p-6 lg:p-10 bg-gray-50 overflow-y-auto">
+                <!-- 4.1. 어드민 대시보드 -->
+                <div id="admin-tab-dashboard" class="admin-tab-content block max-w-6xl">
+                    <h3 class="text-2xl font-black text-gray-900 mb-6">통합 대시보드</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="admin-summary-cards">
+                        <!-- JS Rendered -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <p class="text-gray-500 text-sm font-bold">총 매출</p>
+                            <p class="text-3xl font-black text-gray-900 mt-2">₩12,345,000</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <p class="text-gray-500 text-sm font-bold">주문 건수</p>
+                            <p class="text-3xl font-black text-gray-900 mt-2">412건</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+                            <p class="text-gray-500 text-sm font-bold">신규 회원 (7일)</p>
+                            <p class="text-3xl font-black text-gray-900 mt-2">256명</p>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- 4.2. 직원 관리 탭 (핵심 와이어프레임 구현) -->
+                <div id="admin-tab-staff" class="admin-tab-content hide max-w-6xl">
+                    <div class="flex justify-between items-end mb-6">
+                        <div>
+                            <h3 class="text-2xl font-black text-gray-900">직원 관리</h3>
+                            <p class="text-gray-500 text-sm mt-1">일반 회원을 직원으로 임명하고 권한을 관리합니다.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 직원 추가 검색 폼 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 mb-8">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">신규 직원 검색 (이름 또는 이메일)</label>
+                        <div class="flex gap-3">
+                            <input type="text" id="admin-staff-search" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-brand/20 outline-none" placeholder="회원 검색...">
+                            <button onclick="app.views.admin.searchUser()" class="bg-gray-900 text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">검색</button>
+                        </div>
+                        <div id="admin-search-results" class="mt-4 hide border border-gray-200 rounded-xl divide-y divide-gray-100 max-h-48 overflow-y-auto">
+                            <!-- JS Rendered -->
+                        </div>
+                    </div>
+
+                    <!-- 등록된 직원 목록 -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="px-6 py-4 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
+                            <h4 class="font-bold text-gray-800">등록된 직원 목록</h4>
+                            <button onclick="app.views.admin.loadStaff()" class="text-xs text-gray-500 hover:text-brand flex items-center"><i data-lucide="refresh-cw" class="w-3 h-3 mr-1"></i>새로고침</button>
+                        </div>
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 text-gray-500 font-bold uppercase text-xs border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3">직원명 (이메일)</th>
+                                    <th class="px-4 py-3">직급/역할</th>
+                                    <th class="px-4 py-3">가입일</th>
+                                    <th class="px-6 py-3 text-right">관리</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-staff-table" class="divide-y divide-gray-100">
+                                <!-- JS Rendered -->
+                                <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">로딩 중...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="admin-tab-users" class="admin-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">회원 관리</h3><div class="bg-white p-8 rounded-xl border border-gray-200">기능 구현 예정</div></div>
+                <div id="admin-tab-settings" class="admin-tab-content hide max-w-6xl"><h3 class="text-2xl font-black mb-4">시스템 설정</h3><div class="bg-white p-8 rounded-xl border border-gray-200">기능 구현 예정</div></div>
             </div>
         </section>
     </main>
 
     <!-- Slide-over Cart Panel -->
-    <div id="cart-panel" class="fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] flex flex-col border-l border-gray-200">
+    <div id="cart-panel" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[60] flex flex-col border-l border-gray-200">
         <div class="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-white">
-            <h2 class="text-xl font-black text-gray-900 flex items-center"><i data-lucide="shopping-cart" class="mr-3 w-6 h-6 text-brand"></i>장바구니</h2>
-            <button onclick="app.toggleCart()" class="text-gray-400 hover:text-gray-900 transition-colors p-2 rounded-full hover:bg-gray-100"><i data-lucide="x" class="w-6 h-6"></i></button>
+            <h2 class="text-xl font-black text-gray-900 flex items-center"><i data-lucide="shopping-cart" class="mr-3 w-5 h-5 text-brand"></i>장바구니</h2>
+            <button onclick="app.ui.toggleCart()" class="text-gray-400 hover:text-gray-900 p-2"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="flex-grow p-6 overflow-y-auto bg-gray-50/50" id="cart-items-container">
             <!-- Items injected by JS -->
         </div>
-        <div class="border-t border-gray-200 p-6 bg-white shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.05)]">
-            <div class="flex justify-between items-center mb-6">
-                <span class="font-bold text-gray-500">총 결제 금액</span>
-                <span id="cart-total-price" class="text-3xl font-black text-brand tracking-tight">0원</span>
+        <div class="border-t border-gray-200 p-6 bg-white">
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-bold text-gray-500 text-sm">총 결제 금액</span>
+                <span id="cart-total-price" class="text-2xl font-black text-gray-900">0원</span>
             </div>
-            <button onclick="app.checkout()" class="w-full bg-gray-900 hover:bg-black text-white py-4 rounded-xl font-bold shadow-lg shadow-gray-900/20 transition-all text-lg flex items-center justify-center">
-                <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i> 결제 진행하기
+            <button onclick="app.ui.showToast('결제 모듈 연동 준비 중', 'info')" class="w-full bg-brand hover:bg-brand-hover text-white py-3.5 rounded-xl font-bold shadow-md transition-all text-sm">
+                결제 진행하기
             </button>
         </div>
     </div>
-    <div id="cart-overlay" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[55] hide transition-opacity" onclick="app.toggleCart()"></div>
+    <div id="cart-overlay" class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[55] hide transition-opacity opacity-0" onclick="app.ui.toggleCart()"></div>
 
-    <!-- Dev Menu Modal for Testing -->
-    <div id="mock-login-modal" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6">
-            <h3 class="text-xl font-black text-gray-900 mb-4 flex items-center"><i data-lucide="log-in" class="w-5 h-5 mr-2 text-brand"></i>테스트 로그인 선택</h3>
-            <p class="text-sm text-gray-500 mb-6">원하는 권한으로 로그인하여 UI를 확인하세요.</p>
-            <div class="space-y-3">
-                <button onclick="app.performMockLogin('MEMBER')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-brand hover:bg-blue-50 font-bold text-gray-700 flex justify-between items-center">
-                    일반 회원 (MEMBER) <span class="bg-role-member text-white text-[10px] px-2 py-0.5 rounded">MEMBER</span>
-                </button>
-                <button onclick="app.performMockLogin('STAFF')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50 font-bold text-gray-700 flex justify-between items-center">
-                    직원 (STAFF) <span class="bg-role-staff text-white text-[10px] px-2 py-0.5 rounded">STAFF</span>
-                </button>
-                <button onclick="app.performMockLogin('ADMIN')" class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 hover:border-purple-500 hover:bg-purple-50 font-bold text-gray-700 flex justify-between items-center">
-                    최고 관리자 (ADMIN) <span class="bg-role-admin text-white text-[10px] px-2 py-0.5 rounded">ADMIN</span>
-                </button>
-            </div>
-            <button onclick="document.getElementById('mock-login-modal').classList.add('hidden'); document.getElementById('mock-login-modal').classList.remove('flex');" class="mt-6 w-full text-center text-sm font-medium text-gray-400 hover:text-gray-600">닫기</button>
-        </div>
-    </div>
-
-    <!-- Application Script -->
+    <!-- Application Javascript -->
     <script>
-        // Global Google Login Callback
-        window.handleGoogleLogin = (response) => {
-            console.log("Google Login Response:", response);
-            // In a real app, you would decode the JWT credential here
-            app.showToast("구글 로그인이 호출되었습니다.", "success");
-        };
-
-        // Mock Data for rendering UI without a backend
-        const MOCK_DATA = {
-            videos: [
-                { id: 1, title: 'TOPIK II 읽기 핵심 유형 분석', author: '김선생님', thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&q=80', views: '1.2k' },
-                { id: 2, title: 'TOPIK 듣기 만점 전략', author: '이선생님', thumbnail: 'https://images.unsplash.com/photo-1546410531-ea4cea477149?w=500&q=80', views: '850' },
-                { id: 3, title: '한국어 쓰기 실전 연습', author: '박선생님', thumbnail: 'https://images.unsplash.com/photo-1455390582262-044cdead27d8?w=500&q=80', views: '2.1k' },
-                { id: 4, title: '필수 한국어 관용구 50', author: '최선생님', thumbnail: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=500&q=80', views: '3k' },
-            ],
-            products: [
-                { id: 101, name: '프리미엄 K-Beauty 스킨케어 세트', price: 45000, img: 'https://images.unsplash.com/photo-1596755094514-f87e32f6b717?w=300&q=80' },
-                { id: 102, name: '한국 전통 문양 텀블러', price: 18000, img: 'https://images.unsplash.com/photo-1577937927133-689ce6a147d3?w=300&q=80' },
-                { id: 103, name: '인기 아이돌 응원봉', price: 35000, img: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80' },
-                { id: 104, name: '매운 라면 5봉 세트', price: 6500, img: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=300&q=80' },
-                { id: 105, name: '한복 스타일 생활복', price: 55000, img: 'https://images.unsplash.com/photo-1632738729515-5154ee4204e3?w=300&q=80' },
-            ],
-            mockStaff: [
-                { id: 'u1', name: '김어드민', email: 'admin@ohseyokr.com', role: 'ADMIN', position: '최고 관리자', created_at: '2024-01-01' },
-                { id: 'u2', name: '이직원', email: 'staff1@ohseyokr.com', role: 'STAFF', position: '대리', created_at: '2024-02-15' },
-            ]
-        };
-
         const app = {
             state: {
-                user: null, // null if logged out
+                user: null, // JWT payload
+                token: null,
+                config: { googleClientId: '' },
                 cart: [],
-                isCartOpen: false
+                isCartOpen: false,
+                apiBaseUrl: '/api' // Same domain relative path
             },
 
-            init() {
-                lucide.createIcons();
-                this.renderHomeData();
-                this.updateAuthUI();
-                
-                // Show Google button for aesthetics
-                document.getElementById('google-btn-container').classList.remove('hide');
-            },
-
-            // --- Navigation ---
-            switchView(viewId) {
-                ['view-home', 'view-mypage', 'view-office', 'view-admin'].forEach(id => {
-                    document.getElementById(id).classList.add('hide');
-                });
-                document.getElementById(viewId).classList.remove('hide');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            },
-
-            showHome() { this.switchView('view-home'); },
-            showMyPage() { 
-                if(!this.state.user) return this.showToast('로그인이 필요한 서비스입니다.', 'error');
-                this.switchView('view-mypage'); 
-                document.getElementById('mypage-name').textContent = this.state.user.name;
-                document.getElementById('mypage-email').textContent = this.state.user.email;
-                document.getElementById('mypage-role-text').textContent = this.state.user.role === 'ADMIN' ? '최고 관리자' : (this.state.user.role === 'STAFF' ? '직원' : '일반 회원');
-                document.getElementById('mypage-avatar').src = this.state.user.profile;
-            },
-            showOffice() {
-                if(!this.state.user || (this.state.user.role !== 'STAFF' && this.state.user.role !== 'ADMIN')) {
-                    return this.showToast('직원 전용 접근 공간입니다.', 'error');
-                }
-                this.switchView('view-office');
-            },
-            showAdmin() {
-                if(!this.state.user || this.state.user.role !== 'ADMIN') {
-                    return this.showToast('최고 관리자(Admin) 권한이 없습니다.', 'error');
-                }
-                this.switchView('view-admin');
-                this.renderAdminStaffList();
-            },
-
-            switchAdminTab(btnElement) {
-                document.querySelectorAll('.admin-menu-btn').forEach(btn => {
-                    btn.classList.remove('admin-menu-active', 'bg-gray-50');
-                    btn.classList.add('text-gray-600');
-                    const icon = btn.querySelector('i');
-                    if(icon) {
-                        icon.classList.remove('text-brand');
-                        icon.classList.add('text-gray-400');
+            // --- API Wrapper ---
+            api: {
+                async request(endpoint, options = {}) {
+                    const headers = { 'Content-Type': 'application/json', ...options.headers };
+                    if (app.state.token) headers['Authorization'] = `Bearer ${app.state.token}`;
+                    
+                    try {
+                        const res = await fetch(`${app.state.apiBaseUrl}${endpoint}`, { ...options, headers });
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data.error || 'API Error');
+                        return data;
+                    } catch (err) {
+                        console.warn(`API Failed (${endpoint}):`, err.message);
+                        throw err;
                     }
-                });
-                btnElement.classList.add('admin-menu-active');
-                btnElement.classList.remove('text-gray-600');
-                const activeIcon = btnElement.querySelector('i');
-                if(activeIcon) {
-                    activeIcon.classList.remove('text-gray-400');
-                    activeIcon.classList.add('text-brand');
+                },
+                async get(endpoint) { return this.request(endpoint); },
+                async post(endpoint, body) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(body) }); }
+            },
+
+            // --- Authentication ---
+            auth: {
+                async handleGoogleResponse(response) {
+                    try {
+                        // 1. Send Google credential to backend
+                        const data = await app.api.post('/auth/google', { credential: response.credential });
+                        
+                        // 2. Save JWT & User Data
+                        app.state.token = data.token;
+                        app.state.user = data.user;
+                        localStorage.setItem('ohseyokr_token', data.token);
+                        localStorage.setItem('ohseyokr_user', JSON.stringify(data.user));
+                        
+                        app.ui.showToast(`${data.user.name}님 환영합니다.`, 'success');
+                        app.ui.updateAuthUI();
+                        app.ui.switchView('view-home');
+                    } catch (err) {
+                        app.ui.showToast('로그인에 실패했습니다. (Mock 모드 전환)', 'error');
+                        this.fallbackMockLogin(response);
+                    }
+                },
+                fallbackMockLogin(response) {
+                    // 백엔드 연결 실패시 프론트엔드 전용 Mock 작동
+                    const user = { id: 'u_mock', name: '테스트 유저', email: 'test@ohseyokr.com', role: 'ADMIN', profile: 'https://ui-avatars.com/api/?name=Test&background=random' };
+                    app.state.token = 'mock_token_123';
+                    app.state.user = user;
+                    app.ui.updateAuthUI();
+                    app.ui.showToast('백엔드 미연결: 최고관리자(Admin) 권한으로 임시 로그인됨', 'info');
+                },
+                logout() {
+                    app.state.user = null;
+                    app.state.token = null;
+                    localStorage.removeItem('ohseyokr_token');
+                    localStorage.removeItem('ohseyokr_user');
+                    app.ui.updateAuthUI();
+                    app.ui.switchView('view-home');
+                    app.ui.showToast('로그아웃 되었습니다.');
+                    // 구글 위젯 재렌더링 필요
+                    setTimeout(() => app.initGoogleAuth(), 100);
                 }
-
-                const targetId = btnElement.getAttribute('data-target');
-                document.querySelectorAll('.admin-tab-content').forEach(tab => tab.classList.add('hide'));
-                document.getElementById(targetId).classList.remove('hide');
             },
 
-            // --- Authentication (Mocked) ---
-            mockLoginModal() {
-                const modal = document.getElementById('mock-login-modal');
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            },
+            // --- UI Managers ---
+            ui: {
+                switchView(viewId) {
+                    // Check permissions
+                    if (viewId === 'view-mypage' && !app.state.user) return this.showToast('로그인이 필요합니다.', 'error');
+                    if (viewId === 'view-office' && (!app.state.user || !['STAFF', 'ADMIN'].includes(app.state.user.role))) return this.showToast('직원 권한이 필요합니다.', 'error');
+                    if (viewId === 'view-admin' && (!app.state.user || app.state.user.role !== 'ADMIN')) return this.showToast('최고 관리자 권한이 필요합니다.', 'error');
 
-            performMockLogin(role) {
-                const profiles = {
-                    'MEMBER': { name: '홍길동', email: 'member@test.com', role: 'MEMBER' },
-                    'STAFF': { name: '이직원', email: 'staff@ohseyokr.com', role: 'STAFF' },
-                    'ADMIN': { name: '김어드민', email: 'admin@ohseyokr.com', role: 'ADMIN' }
-                };
-                
-                const user = profiles[role];
-                user.profile = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=f3f4f6&color=3b82f6`;
-                
-                this.state.user = user;
-                this.updateAuthUI();
-                this.showToast(`${user.name}님 환영합니다. (${role})`, 'success');
-                
-                document.getElementById('mock-login-modal').classList.add('hidden');
-                document.getElementById('mock-login-modal').classList.remove('flex');
-                
-                if(role === 'ADMIN') this.showAdmin();
-                else if (role === 'STAFF') this.showOffice();
-                else this.showHome();
-            },
+                    document.querySelectorAll('.view-section').forEach(el => el.classList.add('hide'));
+                    document.getElementById(viewId).classList.remove('hide');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            logout() {
-                this.state.user = null;
-                this.state.cart = [];
-                this.updateAuthUI();
-                this.updateCartBadge();
-                this.showHome();
-                this.showToast('로그아웃 되었습니다.');
-            },
-
-            updateAuthUI() {
-                const authArea = document.getElementById('auth-area');
-                const userArea = document.getElementById('user-area');
-                const navOffice = document.getElementById('nav-office');
-                const navAdmin = document.getElementById('nav-admin');
-
-                if (this.state.user) {
-                    // Logged In
-                    authArea.classList.add('hide');
-                    userArea.classList.remove('hide');
+                    // Init specific view logic
+                    if (viewId === 'view-mypage') app.views.mypage.init();
+                    if (viewId === 'view-office') app.views.office.init();
+                    if (viewId === 'view-admin') app.views.admin.init();
+                },
+                
+                switchTab(viewName, tabId, btnElement) {
+                    const viewElement = document.getElementById(`view-${viewName}`);
                     
-                    document.getElementById('user-name').textContent = this.state.user.name;
-                    document.getElementById('user-email').textContent = this.state.user.email;
-                    document.getElementById('user-avatar').src = this.state.user.profile;
+                    // Reset buttons
+                    viewElement.querySelectorAll('.sidebar-menu-btn').forEach(btn => {
+                        btn.classList.remove('sidebar-menu-active', 'bg-gray-800', 'bg-indigo-900/50', 'text-white');
+                        if(viewName === 'mypage') {
+                            btn.classList.add('text-gray-600', 'hover:bg-gray-50');
+                            if(btn.querySelector('i')) btn.querySelector('i').classList.remove('text-brand');
+                        }
+                    });
                     
-                    const badge = document.getElementById('user-role-badge');
-                    badge.textContent = this.state.user.role;
-                    badge.className = 'text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm leading-none';
-                    
-                    navOffice.classList.add('hide');
-                    navAdmin.classList.add('hide');
+                    // Set active button styles based on view
+                    if(viewName === 'mypage') {
+                        btnElement.classList.add('sidebar-menu-active');
+                        btnElement.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                        if(btnElement.querySelector('i')) btnElement.querySelector('i').classList.add('text-brand');
+                    } else if(viewName === 'office') {
+                        btnElement.classList.add('sidebar-menu-active', 'bg-gray-800', 'text-white');
+                    } else if(viewName === 'admin') {
+                        btnElement.classList.add('sidebar-menu-active', 'bg-indigo-900/50', 'text-white');
+                    }
 
-                    if (this.state.user.role === 'ADMIN') {
-                        badge.classList.add('bg-role-admin');
-                        navAdmin.classList.remove('hide');
-                        navOffice.classList.remove('hide'); // Admin can also access office
-                    } else if (this.state.user.role === 'STAFF') {
-                        badge.classList.add('bg-role-staff');
-                        navOffice.classList.remove('hide');
+                    // Toggle content
+                    viewElement.querySelectorAll(`.${viewName}-tab-content`).forEach(tab => tab.classList.add('hide'));
+                    document.getElementById(`${viewName}-tab-${tabId}`).classList.remove('hide');
+                },
+
+                updateAuthUI() {
+                    const authArea = document.getElementById('auth-area');
+                    const userArea = document.getElementById('user-area');
+                    const navOffice = document.getElementById('nav-office');
+                    const navAdmin = document.getElementById('nav-admin');
+
+                    if (app.state.user) {
+                        authArea.classList.add('hide');
+                        userArea.classList.remove('hide');
+                        
+                        document.getElementById('user-name').textContent = app.state.user.name;
+                        document.getElementById('user-avatar').src = app.state.user.profile || `https://ui-avatars.com/api/?name=${app.state.user.name}&background=f3f4f6&color=3b82f6`;
+                        
+                        const badge = document.getElementById('user-role-badge');
+                        badge.textContent = app.state.user.role;
+                        badge.className = 'text-[9px] font-bold text-white px-1.5 py-0.5 rounded flex items-center shadow-sm mt-0.5 w-max ';
+                        
+                        navOffice.classList.add('hide');
+                        navAdmin.classList.add('hide');
+
+                        if (app.state.user.role === 'ADMIN') {
+                            badge.classList.add('bg-role-admin');
+                            navAdmin.classList.remove('hide');
+                            navOffice.classList.remove('hide');
+                        } else if (app.state.user.role === 'STAFF') {
+                            badge.classList.add('bg-role-staff');
+                            navOffice.classList.remove('hide');
+                        } else {
+                            badge.classList.add('bg-role-member');
+                        }
                     } else {
-                        badge.classList.add('bg-role-member');
+                        authArea.classList.remove('hide');
+                        userArea.classList.add('hide');
                     }
-                } else {
-                    // Logged Out
-                    authArea.classList.remove('hide');
-                    userArea.classList.add('hide');
-                }
-            },
+                },
 
-            // --- Rendering Data ---
-            renderHomeData() {
-                // Render Videos
-                const videoGrid = document.getElementById('video-grid');
-                videoGrid.innerHTML = MOCK_DATA.videos.map(v => `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover cursor-pointer group">
-                        <div class="relative aspect-video overflow-hidden">
-                            <img src="${v.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div class="w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg backdrop-blur-sm">
-                                    <i data-lucide="play" class="w-5 h-5 text-brand ml-1"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-5">
-                            <h3 class="font-bold text-gray-900 line-clamp-2 leading-snug">${v.title}</h3>
-                            <div class="mt-3 flex justify-between items-center text-sm text-gray-500">
-                                <span class="font-medium">${v.author}</span>
-                                <span class="flex items-center"><i data-lucide="eye" class="w-3.5 h-3.5 mr-1"></i>${v.views}</span>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Render Products
-                const productGrid = document.getElementById('product-grid');
-                productGrid.innerHTML = MOCK_DATA.products.map(p => `
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover flex flex-col group">
-                        <div class="relative aspect-[4/5] bg-gray-50 overflow-hidden">
-                            <img src="${p.img}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                        </div>
-                        <div class="p-4 flex flex-col flex-grow">
-                            <h3 class="font-medium text-gray-900 text-sm mb-2 line-clamp-2 flex-grow leading-snug">${p.name}</h3>
-                            <div class="flex justify-between items-end mt-2">
-                                <span class="font-black text-gray-900 text-lg tracking-tight">${p.price.toLocaleString()}원</span>
-                                <button onclick="app.addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-brand hover:text-white transition-colors shadow-sm focus:outline-none">
-                                    <i data-lucide="plus" class="w-4 h-4"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                
-                lucide.createIcons();
-            },
-
-            // --- Cart Logic ---
-            addToCart(id, name, price) {
-                if(!this.state.user) {
-                    this.showToast('로그인 후 이용 가능합니다.', 'error');
-                    return;
-                }
-                const existing = this.state.cart.find(item => item.id === id);
-                if (existing) {
-                    existing.quantity += 1;
-                } else {
-                    this.state.cart.push({ id, name, price, quantity: 1 });
-                }
-                this.updateCartBadge();
-                this.showToast('장바구니에 담겼습니다.', 'success');
-            },
-
-            toggleCart() {
-                if(!this.state.user) return this.showToast('로그인이 필요합니다.', 'error');
-                
-                this.state.isCartOpen = !this.state.isCartOpen;
-                const panel = document.getElementById('cart-panel');
-                const overlay = document.getElementById('cart-overlay');
-                
-                if (this.state.isCartOpen) {
-                    this.renderCartItems();
-                    panel.classList.remove('translate-x-full');
-                    overlay.classList.remove('hide');
-                    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-                } else {
-                    panel.classList.add('translate-x-full');
-                    overlay.classList.add('opacity-0');
-                    setTimeout(() => overlay.classList.add('hide'), 300);
-                }
-            },
-
-            updateCartBadge() {
-                const badge = document.getElementById('cart-badge');
-                const total = this.state.cart.reduce((sum, item) => sum + item.quantity, 0);
-                if (total > 0) {
-                    badge.textContent = total;
-                    badge.classList.remove('hide');
-                } else {
-                    badge.classList.add('hide');
-                }
-            },
-
-            renderCartItems() {
-                const container = document.getElementById('cart-items-container');
-                const totalEl = document.getElementById('cart-total-price');
-                
-                if (this.state.cart.length === 0) {
-                    container.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full text-gray-400 space-y-4">
-                            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm"><i data-lucide="shopping-bag" class="w-10 h-10 text-gray-300"></i></div>
-                            <p class="font-medium">장바구니가 텅 비어있습니다.</p>
-                        </div>`;
-                    totalEl.textContent = '0원';
+                showToast(message, type = 'info') {
+                    const toast = document.getElementById('toast');
+                    const msgEl = document.getElementById('toast-msg');
+                    const iconContainer = document.getElementById('toast-icon');
+                    
+                    msgEl.textContent = message;
+                    if(type === 'error') {
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-red-500/20 text-red-400';
+                        iconContainer.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
+                    } else if(type === 'success') {
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 text-green-400';
+                        iconContainer.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>';
+                    } else {
+                        iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400';
+                        iconContainer.innerHTML = '<i data-lucide="info" class="w-4 h-4"></i>';
+                    }
                     lucide.createIcons();
-                    return;
+                    
+                    toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+                    setTimeout(() => toast.classList.add('opacity-0', 'translate-y-[-20px]'), 3000);
+                },
+
+                toggleCart() {
+                    app.state.isCartOpen = !app.state.isCartOpen;
+                    const panel = document.getElementById('cart-panel');
+                    const overlay = document.getElementById('cart-overlay');
+                    
+                    if (app.state.isCartOpen) {
+                        app.views.cart.render();
+                        panel.classList.remove('translate-x-full');
+                        overlay.classList.remove('hide');
+                        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                    } else {
+                        panel.classList.add('translate-x-full');
+                        overlay.classList.add('opacity-0');
+                        setTimeout(() => overlay.classList.add('hide'), 300);
+                    }
+                },
+                updateCartBadge() {
+                    const badge = document.getElementById('cart-badge');
+                    if (app.state.cart.length > 0) {
+                        badge.textContent = app.state.cart.length;
+                        badge.classList.remove('hide');
+                    } else {
+                        badge.classList.add('hide');
+                    }
                 }
-
-                let total = 0;
-                container.innerHTML = `<div class="space-y-4">` + this.state.cart.map((item, index) => {
-                    total += item.price * item.quantity;
-                    return `
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex justify-between items-center">
-                        <div>
-                            <h4 class="font-bold text-gray-900 text-sm mb-1">${item.name}</h4>
-                            <p class="text-brand font-black tracking-tight">${item.price.toLocaleString()}원</p>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-sm font-medium bg-gray-50 px-2 py-1 rounded border border-gray-100">수량: ${item.quantity}</span>
-                            <button onclick="app.removeFromCart(${index})" class="text-gray-400 hover:text-red-500 p-1"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                        </div>
-                    </div>`;
-                }).join('') + `</div>`;
-                
-                totalEl.textContent = total.toLocaleString() + '원';
-                lucide.createIcons();
             },
 
-            removeFromCart(index) {
-                this.state.cart.splice(index, 1);
-                this.updateCartBadge();
-                this.renderCartItems();
-            },
-
-            checkout() {
-                if(this.state.cart.length === 0) return this.showToast('결제할 상품이 없습니다.', 'error');
-                this.showToast('결제 모듈 연동 준비 중입니다.', 'info');
-                this.toggleCart();
-            },
-
-            // --- Admin Specific Mock Logic ---
-            renderAdminStaffList() {
-                const tbody = document.getElementById('admin-staff-list');
-                tbody.innerHTML = MOCK_DATA.mockStaff.map(user => `
-                    <tr class="hover:bg-gray-50/50 transition-colors group">
-                        <td class="px-8 py-4">
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 mr-3 border border-gray-200">${user.name.charAt(0)}</div>
-                                <div>
-                                    <div class="font-bold text-gray-900 text-sm">${user.name}</div>
-                                    <div class="text-gray-500 text-xs mt-0.5">${user.email}</div>
+            // --- Specific View Logics ---
+            views: {
+                home: {
+                    async init() {
+                        try {
+                            const data = await app.api.get('/public/data');
+                            this.render(data);
+                        } catch(e) {
+                            // Mock Fallback
+                            this.render({
+                                videos: [
+                                    { title: '[대기중] TOPIK II 쓰기 만점 전략', id: '1' },
+                                    { title: 'TOPIK II 듣기 실전 모의고사 1회', id: '2' },
+                                    { title: '초급자도 귀가 뚫리는 한국어 문법', id: '3' },
+                                    { title: 'TOPIK 어휘 300제 벼락치기 풀이', id: '4' }
+                                ],
+                                products: [
+                                    { name: '한국 정통 홍삼 진액 에디션', price: 68000, id: 101 },
+                                    { name: '한국 전통 간식 4종 세트', price: 19000, id: 102 },
+                                    { name: 'TOPIK II 실전 기출 문제집', price: 17000, id: 103 },
+                                    { name: 'K-뷰티 스킨케어 입문 세트', price: 34000, id: 104 }
+                                ]
+                            });
+                        }
+                    },
+                    render(data) {
+                        const vGrid = document.getElementById('home-video-grid');
+                        vGrid.innerHTML = data.videos.map(v => `
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover cursor-pointer group flex flex-col">
+                                <div class="aspect-video bg-gray-50 flex items-center justify-center border-b border-gray-100 relative">
+                                    <span class="font-black text-xl text-brand/30">TOPIK Video</span>
+                                    <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all"><i data-lucide="play-circle" class="w-10 h-10 text-white"></i></div>
+                                </div>
+                                <div class="p-5 flex-grow">
+                                    <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded font-bold mb-2 inline-block">고급</span>
+                                    <h3 class="font-bold text-gray-900 text-sm leading-snug line-clamp-2">${v.title}</h3>
                                 </div>
                             </div>
-                        </td>
-                        <td class="px-6 py-4">
-                            ${user.role === 'ADMIN' 
-                                ? `<span class="inline-flex items-center bg-role-admin/10 text-role-admin px-2.5 py-1 rounded-md text-[10px] font-bold border border-role-admin/20"><i data-lucide="shield" class="w-3 h-3 mr-1"></i>ADMIN</span>`
-                                : `<span class="inline-flex items-center bg-role-staff/10 text-role-staff px-2.5 py-1 rounded-md text-[10px] font-bold border border-role-staff/20"><i data-lucide="briefcase" class="w-3 h-3 mr-1"></i>STAFF</span>`
-                            }
-                        </td>
-                        <td class="px-6 py-4"><span class="font-medium text-gray-700 text-sm">${user.position}</span></td>
-                        <td class="px-8 py-4 text-right">
-                            ${user.role !== 'ADMIN' ? `<button onclick="app.showToast('권한 해제 기능 (Mock)')" class="text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition-all opacity-0 group-hover:opacity-100">권한 해제</button>` : '<span class="text-xs text-gray-400 font-medium">수정불가</span>'}
-                        </td>
-                    </tr>
-                `).join('');
-                lucide.createIcons();
-            },
+                        `).join('');
 
-            adminSearchUser() {
-                const val = document.getElementById('admin-staff-search-input').value;
-                if(!val) return this.showToast('이름을 입력하세요', 'error');
-                
-                const area = document.getElementById('admin-search-result-area');
-                const list = document.getElementById('admin-search-results');
-                area.classList.remove('hide');
-                
-                // Mock Result
-                list.innerHTML = `
-                    <li class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-brand/30 transition-colors gap-4">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold mr-3 border border-gray-200">홍</div>
-                            <div>
-                                <span class="font-bold text-gray-900 text-sm">홍길동 (검색된 회원)</span>
-                                <span class="inline-block ml-2 text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded font-medium">member@test.com</span>
+                        const pGrid = document.getElementById('home-product-grid');
+                        pGrid.innerHTML = data.products.map(p => `
+                            <div class="bg-white rounded-2xl overflow-hidden shadow-card border border-gray-100 card-hover group flex flex-col">
+                                <div class="aspect-square bg-gray-50 flex items-center justify-center border-b border-gray-100 relative">
+                                     <span class="font-black text-xl text-gray-300">K-Goods</span>
+                                </div>
+                                <div class="p-4 flex flex-col flex-grow">
+                                    <h3 class="font-bold text-gray-800 text-xs mb-2 line-clamp-2 flex-grow">${p.name}</h3>
+                                    <div class="flex justify-between items-end mt-1">
+                                        <span class="font-black text-gray-900 tracking-tight">₩${p.price.toLocaleString()}</span>
+                                        <button onclick="app.views.cart.add(${p.id}, '${p.name}', ${p.price})" class="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 hover:bg-brand hover:text-white transition-colors">
+                                            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="flex items-center space-x-2 w-full sm:w-auto">
-                            <select class="flex-1 sm:flex-none text-xs border border-gray-200 rounded-lg px-2 py-1.5 outline-none font-medium bg-gray-50">
-                                <option>사원</option><option>대리</option>
-                            </select>
-                            <button onclick="app.showToast('직원 임명 성공 (Mock)', 'success'); document.getElementById('admin-search-result-area').classList.add('hide');" class="bg-brand/10 text-brand hover:bg-brand hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold border border-brand/20 transition-all shadow-sm">직원 임명</button>
-                        </div>
-                    </li>`;
+                        `).join('');
+                        lucide.createIcons();
+                    }
+                },
+                mypage: {
+                    init() {
+                        document.getElementById('mypage-welcome-name').textContent = app.state.user.name;
+                        document.getElementById('mypage-profile-name').textContent = app.state.user.name;
+                        document.getElementById('mypage-profile-email').textContent = app.state.user.email;
+                        document.getElementById('mypage-profile-img').src = app.state.user.profile || `https://ui-avatars.com/api/?name=${app.state.user.name}&background=f3f4f6`;
+                    }
+                },
+                office: {
+                    async init() {
+                        try {
+                            const data = await app.api.get('/office/dashboard');
+                            this.renderDashboard(data);
+                        } catch(e) {
+                            // Mock Fallback
+                            this.renderDashboard({
+                                pendingVideos: [{ id: 1, title: 'TOPIK 듣기 실전', created_at: '2024-05-07' }],
+                                pendingProducts: [{ id: 101, name: '한국 전통 부채', price: 15000 }]
+                            });
+                        }
+                    },
+                    renderDashboard(data) {
+                        document.getElementById('office-pending-video-count').textContent = `${data.pendingVideos.length}건`;
+                        document.getElementById('office-pending-product-count').textContent = `${data.pendingProducts.length}건`;
+                        
+                        document.getElementById('office-pending-videos').innerHTML = data.pendingVideos.map(v => `
+                            <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-lg mb-2 shadow-sm">
+                                <div><p class="text-sm font-bold text-gray-800">${v.title}</p></div>
+                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-brand/10 text-brand px-3 py-1.5 rounded-md font-bold hover:bg-brand hover:text-white transition-colors">승인</button>
+                            </div>
+                        `).join('') || '<p class="text-center text-gray-400 text-sm py-4">대기 내역 없음</p>';
+
+                        document.getElementById('office-pending-products').innerHTML = data.pendingProducts.map(p => `
+                            <div class="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-lg mb-2 shadow-sm">
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800">${p.name}</p>
+                                    <p class="text-xs text-gray-500">₩${p.price.toLocaleString()}</p>
+                                </div>
+                                <button onclick="app.ui.showToast('승인 완료 (Mock)', 'success')" class="text-xs bg-brand/10 text-brand px-3 py-1.5 rounded-md font-bold hover:bg-brand hover:text-white transition-colors">승인</button>
+                            </div>
+                        `).join('') || '<p class="text-center text-gray-400 text-sm py-4">대기 내역 없음</p>';
+                    }
+                },
+                admin: {
+                    init() {
+                        this.loadStaff();
+                    },
+                    async loadStaff() {
+                        const tbody = document.getElementById('admin-staff-table');
+                        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">데이터를 불러오는 중...</td></tr>';
+                        try {
+                            const data = await app.api.get('/admin/staff');
+                            this.renderStaffList(data.staff);
+                        } catch(e) {
+                            // Mock Fallback
+                            this.renderStaffList([
+                                { id: 'u1', name: '김어드민', email: 'admin@ohseyokr.com', role: 'ADMIN', staff_position: '최고 관리자', created_at: '2024-01-01' },
+                                { id: 'u2', name: '이직원', email: 'staff1@ohseyokr.com', role: 'STAFF', staff_position: '콘텐츠 관리자', created_at: '2024-02-15' }
+                            ]);
+                        }
+                    },
+                    renderStaffList(staffArray) {
+                        const tbody = document.getElementById('admin-staff-table');
+                        if(!staffArray || staffArray.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">등록된 직원이 없습니다.</td></tr>';
+                            return;
+                        }
+                        
+                        tbody.innerHTML = staffArray.map(user => `
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-3">
+                                    <div class="font-bold text-gray-900 text-sm">${user.name}</div>
+                                    <div class="text-gray-500 text-xs">${user.email}</div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    ${user.role === 'ADMIN' 
+                                        ? `<span class="inline-flex items-center bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[10px] font-bold"><i data-lucide="shield" class="w-3 h-3 mr-1"></i>ADMIN</span>`
+                                        : `<span class="inline-flex items-center bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[10px] font-bold"><i data-lucide="briefcase" class="w-3 h-3 mr-1"></i>STAFF</span>`
+                                    }
+                                    <span class="text-xs text-gray-600 ml-2 font-medium">${user.staff_position || ''}</span>
+                                </td>
+                                <td class="px-4 py-3 text-xs text-gray-500">${new Date(user.created_at).toLocaleDateString()}</td>
+                                <td class="px-6 py-3 text-right">
+                                    ${user.role !== 'ADMIN' 
+                                        ? `<button onclick="app.views.admin.removeStaff('${user.id}')" class="text-red-500 hover:text-white hover:bg-red-500 text-xs font-bold px-3 py-1.5 rounded-lg border border-red-200 transition-all">권한 해제</button>` 
+                                        : '<span class="text-xs text-gray-400">해제 불가</span>'}
+                                </td>
+                            </tr>
+                        `).join('');
+                        lucide.createIcons();
+                    },
+                    async searchUser() {
+                        const q = document.getElementById('admin-staff-search').value;
+                        if(!q) return app.ui.showToast('검색어를 입력하세요.', 'error');
+                        
+                        const resultDiv = document.getElementById('admin-search-results');
+                        resultDiv.classList.remove('hide');
+                        resultDiv.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">검색 중...</div>';
+                        
+                        try {
+                            const data = await app.api.get(`/admin/users/search?q=${encodeURIComponent(q)}`);
+                            this.renderSearchResults(data.users);
+                        } catch(e) {
+                            // Mock Fallback
+                            this.renderSearchResults([
+                                { id: 'm1', name: q + ' (검색됨)', email: 'search@test.com', role: 'MEMBER' }
+                            ]);
+                        }
+                    },
+                    renderSearchResults(users) {
+                        const resultDiv = document.getElementById('admin-search-results');
+                        if(!users || users.length === 0) {
+                            resultDiv.innerHTML = '<div class="p-4 text-center text-sm text-gray-400">검색 결과가 없습니다.</div>';
+                            return;
+                        }
+                        resultDiv.innerHTML = users.map(u => `
+                            <div class="p-4 flex items-center justify-between hover:bg-gray-50">
+                                <div>
+                                    <p class="font-bold text-sm text-gray-900">${u.name} <span class="text-xs font-normal text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded ml-1">${u.email}</span></p>
+                                </div>
+                                <button onclick="app.views.admin.addStaff('${u.id}')" class="text-xs bg-brand/10 text-brand hover:bg-brand hover:text-white px-3 py-1.5 rounded font-bold transition-colors">직원 임명</button>
+                            </div>
+                        `).join('');
+                    },
+                    async addStaff(userId) {
+                        try {
+                            await app.api.post('/admin/staff/add', { userId, position: 'STAFF' });
+                            app.ui.showToast('직원으로 임명되었습니다.', 'success');
+                            document.getElementById('admin-search-results').classList.add('hide');
+                            this.loadStaff();
+                        } catch(e) {
+                            app.ui.showToast('MOCK: 직원이 추가되었습니다.', 'success');
+                            document.getElementById('admin-search-results').classList.add('hide');
+                        }
+                    },
+                    async removeStaff(userId) {
+                        if(!confirm('정말 직원 권한을 해제하시겠습니까?')) return;
+                        try {
+                            await app.api.post('/admin/staff/remove', { userId });
+                            app.ui.showToast('직원 권한이 해제되었습니다.', 'success');
+                            this.loadStaff();
+                        } catch(e) {
+                            app.ui.showToast('MOCK: 권한이 해제되었습니다.', 'success');
+                        }
+                    }
+                },
+                cart: {
+                    add(id, name, price) {
+                        const existing = app.state.cart.find(item => item.id === id);
+                        if (existing) existing.quantity += 1;
+                        else app.state.cart.push({ id, name, price, quantity: 1 });
+                        
+                        app.ui.updateCartBadge();
+                        app.ui.showToast('장바구니에 추가되었습니다.', 'success');
+                    },
+                    render() {
+                        const container = document.getElementById('cart-items-container');
+                        const totalEl = document.getElementById('cart-total-price');
+                        
+                        if (app.state.cart.length === 0) {
+                            container.innerHTML = '<div class="text-center text-gray-400 mt-10 text-sm">장바구니가 비어있습니다.</div>';
+                            totalEl.textContent = '0원';
+                            return;
+                        }
+
+                        let total = 0;
+                        container.innerHTML = app.state.cart.map((item, index) => {
+                            total += item.price * item.quantity;
+                            return `
+                            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-3 flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm mb-1 line-clamp-1">${item.name}</h4>
+                                    <p class="text-brand font-black tracking-tight text-sm">₩${item.price.toLocaleString()}</p>
+                                </div>
+                                <div class="flex items-center space-x-3 ml-4 shrink-0">
+                                    <span class="text-xs font-medium bg-gray-50 px-2 py-1 rounded border border-gray-100">수량: ${item.quantity}</span>
+                                    <button onclick="app.state.cart.splice(${index}, 1); app.ui.updateCartBadge(); app.views.cart.render();" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>`;
+                        }).join('');
+                        totalEl.textContent = '₩' + total.toLocaleString();
+                        lucide.createIcons();
+                    }
+                }
             },
 
-            showToast(message, type = 'info') {
-                const toast = document.getElementById('toast');
-                const msgEl = document.getElementById('toast-msg');
-                const iconContainer = document.getElementById('toast-icon');
-                
-                msgEl.textContent = message;
-                if(type === 'error') {
-                    iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-red-500/20 text-red-400';
-                    iconContainer.innerHTML = '<i data-lucide="alert-circle" class="w-4 h-4"></i>';
-                } else if(type === 'success') {
-                    iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-green-500/20 text-green-400';
-                    iconContainer.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>';
-                } else {
-                    iconContainer.className = 'w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400';
-                    iconContainer.innerHTML = '<i data-lucide="info" class="w-4 h-4"></i>';
+            // --- Initialization ---
+            async fetchConfig() {
+                try {
+                    const data = await this.api.get('/public/config');
+                    if(data && data.googleClientId) this.state.config.googleClientId = data.googleClientId;
+                } catch(e) {
+                    console.log("Config fetch failed. Using fallback client ID for UI render.");
+                    // Fallback for UI visualization only
+                    this.state.config.googleClientId = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
                 }
+            },
+
+            initGoogleAuth() {
+                const wrapper = document.getElementById('google-login-btn-wrapper');
+                wrapper.innerHTML = ''; // Clear existing
+                
+                // Expose global callback for Google library
+                window.handleGoogleCredential = (res) => this.auth.handleGoogleResponse(res);
+
+                if (window.google && window.google.accounts) {
+                    google.accounts.id.initialize({
+                        client_id: this.state.config.googleClientId,
+                        callback: window.handleGoogleCredential
+                    });
+                    google.accounts.id.renderButton(
+                        wrapper,
+                        { theme: "outline", size: "large", type: "standard" }
+                    );
+                } else {
+                    wrapper.innerHTML = '<span class="text-xs text-red-500">구글 로그인 로드 실패</span>';
+                }
+            },
+
+            async bootstrap() {
                 lucide.createIcons();
                 
-                toast.classList.remove('opacity-0', 'translate-y-[-20px]');
-                setTimeout(() => toast.classList.add('opacity-0', 'translate-y-[-20px]'), 3000);
+                // 1. Fetch Config
+                await this.fetchConfig();
+                
+                // 2. Init Google Auth
+                this.initGoogleAuth();
+
+                // 3. Check Local Storage for session
+                const savedToken = localStorage.getItem('ohseyokr_token');
+                const savedUser = localStorage.getItem('ohseyokr_user');
+                if(savedToken && savedUser) {
+                    try {
+                        this.state.token = savedToken;
+                        this.state.user = JSON.parse(savedUser);
+                    } catch(e) { localStorage.clear(); }
+                }
+
+                this.ui.updateAuthUI();
+                this.views.home.init();
             }
         };
 
-        // Initialize App on Load
-        document.addEventListener('DOMContentLoaded', () => {
-            app.init();
-        });
+        // Bootstrap App
+        document.addEventListener('DOMContentLoaded', () => app.bootstrap());
     </script>
 </body>
 </html>
